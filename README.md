@@ -20,6 +20,7 @@
 
 <p align="center">
   <em>Transform natural language mission requirements into complete, build-ready drone designs with physics-validated engineering specifications.</em>
+  <em>Made with <3 by Akshay  Gupta Burela</em>
 </p>
 
 ---
