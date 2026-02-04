@@ -1,0 +1,8 @@
+{
+    "mission": "Design a hexacopter drone for agricultural crop spraying. The drone must carry a 15-liter liquid payload (approximately 15kg), fly for at least 20 minutes per battery, operate in temperatures up to 45°C, and have autonomous waypoint navigation capability for field coverage. It should comply with Indian DGCA regulations for agricultural drones. Budget is approximately $3000 USD. The drone needs GPS-based autonomous flight, return-to-home functionality, and should be able to withstand mild dust and water spray. Include a spraying system mount point.",
+    "provider": "ollama",
+    "model": "llama3",
+    "cad_detail": "basic",
+    "jurisdictions": ["india_dgca"],
+    "output_dir": "./output/agricultural_sprayer"
+}

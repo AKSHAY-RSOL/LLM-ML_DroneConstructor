@@ -1,0 +1,297 @@
+{
+  "metadata": {
+    "version": "1.0.0",
+    "last_updated": "2026-01-15",
+    "description": "Materials database for drone structural components",
+    "units": {
+      "density": "g/cm³",
+      "tensile_strength": "MPa",
+      "modulus": "GPa",
+      "price": "INR per kg"
+    }
+  },
+  "materials": {
+    "carbon_fiber_composites": [
+      {
+        "id": "CF_3K_TWILL",
+        "name": "3K Carbon Fiber Twill",
+        "type": "composite",
+        "weave": "2x2 Twill",
+        "density_g_cm3": 1.55,
+        "tensile_strength_mpa": 600,
+        "tensile_modulus_gpa": 70,
+        "compressive_strength_mpa": 570,
+        "flexural_strength_mpa": 800,
+        "flexural_modulus_gpa": 65,
+        "elongation_percent": 1.5,
+        "thermal_expansion_ppm_c": 0.5,
+        "max_service_temp_c": 120,
+        "thickness_available_mm": [0.5, 1.0, 1.5, 2.0, 3.0, 4.0, 5.0],
+        "application": ["frames", "arms", "plates", "propellers"],
+        "pros": ["High strength-to-weight", "Stiff", "Fatigue resistant"],
+        "cons": ["Expensive", "Brittle failure", "RF blocking"],
+        "machinability": "CNC required, diamond tools",
+        "price_inr_per_kg": 8000,
+        "availability": "readily_available"
+      },
+      {
+        "id": "CF_UD_TUBE",
+        "name": "Unidirectional Carbon Fiber Tube",
+        "type": "composite",
+        "weave": "Unidirectional",
+        "density_g_cm3": 1.60,
+        "tensile_strength_mpa": 1200,
+        "tensile_modulus_gpa": 135,
+        "bending_strength_mpa": 1500,
+        "application": ["arms", "booms", "landing_gear"],
+        "available_diameters_mm": [8, 10, 12, 14, 16, 20, 25, 30],
+        "wall_thickness_mm": [0.5, 1.0, 1.5, 2.0],
+        "pros": ["Maximum stiffness in length direction", "Very light"],
+        "cons": ["Weak in torsion", "Expensive"],
+        "price_inr_per_meter": 250,
+        "availability": "readily_available"
+      },
+      {
+        "id": "CF_SANDWICH_HONEYCOMB",
+        "name": "Carbon Fiber Honeycomb Sandwich",
+        "type": "sandwich_composite",
+        "face_material": "3K Carbon Fiber",
+        "core_material": "Aramid Honeycomb",
+        "density_g_cm3": 0.35,
+        "tensile_strength_mpa": 350,
+        "flexural_stiffness": "Very High",
+        "thickness_mm": [5, 8, 10, 15, 20],
+        "application": ["large_frames", "payload_mounts", "panels"],
+        "pros": ["Extremely light", "High bending stiffness"],
+        "cons": ["Edge sensitive", "Moisture absorption", "Very expensive"],
+        "price_inr_per_sqm": 25000,
+        "availability": "specialty"
+      }
+    ],
+    "aluminum_alloys": [
+      {
+        "id": "AL_6061_T6",
+        "name": "Aluminum 6061-T6",
+        "type": "metal",
+        "density_g_cm3": 2.70,
+        "tensile_strength_mpa": 310,
+        "yield_strength_mpa": 276,
+        "tensile_modulus_gpa": 68.9,
+        "elongation_percent": 12,
+        "thermal_expansion_ppm_c": 23.6,
+        "thermal_conductivity_w_mk": 167,
+        "max_service_temp_c": 170,
+        "application": ["motor_mounts", "brackets", "landing_gear", "CNC_parts"],
+        "pros": ["Easy to machine", "Weldable", "Good strength", "Corrosion resistant"],
+        "cons": ["Heavier than CF", "Lower stiffness"],
+        "machinability": "Excellent",
+        "price_inr_per_kg": 350,
+        "availability": "readily_available"
+      },
+      {
+        "id": "AL_7075_T6",
+        "name": "Aluminum 7075-T6",
+        "type": "metal",
+        "density_g_cm3": 2.81,
+        "tensile_strength_mpa": 572,
+        "yield_strength_mpa": 503,
+        "tensile_modulus_gpa": 71.7,
+        "elongation_percent": 11,
+        "thermal_expansion_ppm_c": 23.4,
+        "thermal_conductivity_w_mk": 130,
+        "max_service_temp_c": 120,
+        "application": ["high_stress_brackets", "motor_mounts", "structural_parts"],
+        "pros": ["Very high strength", "Good machinability"],
+        "cons": ["Not weldable", "Corrosion prone without coating"],
+        "machinability": "Good",
+        "price_inr_per_kg": 550,
+        "availability": "readily_available"
+      }
+    ],
+    "3d_printing_materials": [
+      {
+        "id": "PLA",
+        "name": "PLA (Polylactic Acid)",
+        "type": "thermoplastic",
+        "density_g_cm3": 1.24,
+        "tensile_strength_mpa": 50,
+        "tensile_modulus_gpa": 3.5,
+        "elongation_percent": 6,
+        "glass_transition_c": 60,
+        "max_service_temp_c": 50,
+        "bed_temp_c": 60,
+        "nozzle_temp_c": 210,
+        "application": ["prototypes", "non_structural", "indoor_only"],
+        "pros": ["Easy to print", "Cheap", "Biodegradable", "Low warping"],
+        "cons": ["Low heat resistance", "Brittle", "Weak"],
+        "print_settings": {"layer_height_mm": 0.2, "infill_percent": 20},
+        "price_inr_per_kg": 1200,
+        "availability": "readily_available"
+      },
+      {
+        "id": "PETG",
+        "name": "PETG (Polyethylene Terephthalate Glycol)",
+        "type": "thermoplastic",
+        "density_g_cm3": 1.27,
+        "tensile_strength_mpa": 53,
+        "tensile_modulus_gpa": 2.2,
+        "elongation_percent": 18,
+        "glass_transition_c": 80,
+        "max_service_temp_c": 70,
+        "bed_temp_c": 80,
+        "nozzle_temp_c": 240,
+        "application": ["canopies", "camera_mounts", "light_structural"],
+        "pros": ["Impact resistant", "Good layer adhesion", "Water resistant"],
+        "cons": ["Strings", "Hygroscopic", "Medium strength"],
+        "print_settings": {"layer_height_mm": 0.2, "infill_percent": 30},
+        "price_inr_per_kg": 1500,
+        "availability": "readily_available"
+      },
+      {
+        "id": "ABS",
+        "name": "ABS (Acrylonitrile Butadiene Styrene)",
+        "type": "thermoplastic",
+        "density_g_cm3": 1.04,
+        "tensile_strength_mpa": 45,
+        "tensile_modulus_gpa": 2.3,
+        "elongation_percent": 20,
+        "glass_transition_c": 105,
+        "max_service_temp_c": 90,
+        "bed_temp_c": 110,
+        "nozzle_temp_c": 250,
+        "application": ["structural_parts", "enclosures", "motor_mounts"],
+        "pros": ["Heat resistant", "Impact resistant", "Post-processable"],
+        "cons": ["Warps", "Requires enclosure", "Fumes"],
+        "print_settings": {"layer_height_mm": 0.2, "infill_percent": 40},
+        "price_inr_per_kg": 1400,
+        "availability": "readily_available"
+      },
+      {
+        "id": "NYLON_CF",
+        "name": "Carbon Fiber Reinforced Nylon",
+        "type": "composite_thermoplastic",
+        "density_g_cm3": 1.20,
+        "tensile_strength_mpa": 85,
+        "tensile_modulus_gpa": 6.0,
+        "elongation_percent": 4,
+        "glass_transition_c": 120,
+        "max_service_temp_c": 110,
+        "bed_temp_c": 80,
+        "nozzle_temp_c": 270,
+        "hardened_nozzle_required": true,
+        "application": ["structural_parts", "arms", "motor_mounts", "functional_parts"],
+        "pros": ["Very strong", "Stiff", "Heat resistant", "Lightweight"],
+        "cons": ["Expensive", "Hygroscopic", "Abrasive"],
+        "print_settings": {"layer_height_mm": 0.2, "infill_percent": 50},
+        "price_inr_per_kg": 5000,
+        "availability": "readily_available"
+      },
+      {
+        "id": "TPU_95A",
+        "name": "TPU 95A (Thermoplastic Polyurethane)",
+        "type": "elastomer",
+        "density_g_cm3": 1.21,
+        "tensile_strength_mpa": 40,
+        "elongation_percent": 450,
+        "shore_hardness": "95A",
+        "max_service_temp_c": 80,
+        "bed_temp_c": 50,
+        "nozzle_temp_c": 230,
+        "application": ["vibration_dampers", "landing_gear_pads", "protective_parts"],
+        "pros": ["Flexible", "Impact absorbing", "Abrasion resistant"],
+        "cons": ["Difficult to print", "Low stiffness"],
+        "print_settings": {"layer_height_mm": 0.2, "print_speed_mm_s": 25},
+        "price_inr_per_kg": 2500,
+        "availability": "readily_available"
+      }
+    ],
+    "other_materials": [
+      {
+        "id": "G10_FR4",
+        "name": "G10/FR4 Fiberglass",
+        "type": "composite",
+        "density_g_cm3": 1.85,
+        "tensile_strength_mpa": 310,
+        "tensile_modulus_gpa": 18,
+        "max_service_temp_c": 130,
+        "application": ["arm_spacers", "budget_frames", "electrical_isolation"],
+        "pros": ["Cheap", "RF transparent", "Good electrical insulation"],
+        "cons": ["Heavy", "Lower strength than CF"],
+        "price_inr_per_kg": 800,
+        "availability": "readily_available"
+      },
+      {
+        "id": "TITANIUM_GR5",
+        "name": "Titanium Grade 5 (Ti-6Al-4V)",
+        "type": "metal",
+        "density_g_cm3": 4.43,
+        "tensile_strength_mpa": 1100,
+        "yield_strength_mpa": 1000,
+        "tensile_modulus_gpa": 114,
+        "elongation_percent": 14,
+        "max_service_temp_c": 400,
+        "application": ["high_stress_fasteners", "premium_parts", "motor_shafts"],
+        "pros": ["Highest strength-to-weight", "Corrosion proof", "Heat resistant"],
+        "cons": ["Very expensive", "Difficult to machine"],
+        "price_inr_per_kg": 8000,
+        "availability": "specialty"
+      }
+    ]
+  },
+  "selection_guidelines": {
+    "by_component": {
+      "main_frame_plates": {
+        "recommended": ["CF_3K_TWILL", "AL_6061_T6"],
+        "priority": "stiffness_weight_ratio"
+      },
+      "arms": {
+        "recommended": ["CF_UD_TUBE", "CF_3K_TWILL"],
+        "priority": "bending_stiffness"
+      },
+      "motor_mounts": {
+        "recommended": ["AL_7075_T6", "NYLON_CF", "AL_6061_T6"],
+        "priority": "heat_resistance_strength"
+      },
+      "landing_gear": {
+        "recommended": ["CF_UD_TUBE", "AL_6061_T6", "NYLON_CF"],
+        "priority": "impact_resistance"
+      },
+      "canopy": {
+        "recommended": ["PETG", "PLA", "TPU_95A"],
+        "priority": "weight_impact_resistance"
+      },
+      "vibration_dampers": {
+        "recommended": ["TPU_95A"],
+        "priority": "damping"
+      }
+    },
+    "by_budget": {
+      "low": ["PLA", "PETG", "G10_FR4", "AL_6061_T6"],
+      "medium": ["ABS", "NYLON_CF", "AL_7075_T6", "CF_3K_TWILL"],
+      "high": ["CF_UD_TUBE", "CF_SANDWICH_HONEYCOMB", "TITANIUM_GR5"]
+    },
+    "by_manufacturing": {
+      "3d_printing": ["PLA", "PETG", "ABS", "NYLON_CF", "TPU_95A"],
+      "cnc_machining": ["AL_6061_T6", "AL_7075_T6", "CF_3K_TWILL", "G10_FR4"],
+      "laser_cutting": ["CF_3K_TWILL", "G10_FR4", "plywood"],
+      "composite_layup": ["CF_3K_TWILL", "CF_SANDWICH_HONEYCOMB"]
+    }
+  },
+  "stress_calculations": {
+    "arm_bending": {
+      "formula": "sigma = (M * c) / I",
+      "description": "Bending stress in arm",
+      "variables": {
+        "M": "Bending moment (thrust * arm_length)",
+        "c": "Distance from neutral axis to outer fiber",
+        "I": "Second moment of area"
+      },
+      "safety_factor": 2.5
+    },
+    "tube_section_properties": {
+      "moment_of_inertia": "I = (pi/64) * (D_outer^4 - D_inner^4)",
+      "section_modulus": "S = I / (D_outer/2)",
+      "area": "A = (pi/4) * (D_outer^2 - D_inner^2)"
+    }
+  }
+}

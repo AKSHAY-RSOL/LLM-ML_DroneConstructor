@@ -1,0 +1,398 @@
+{
+  "metadata": {
+    "version": "1.0.0",
+    "last_updated": "2026-01-15",
+    "description": "Brushless motor database for drone applications",
+    "units": {
+      "kv": "RPM/V",
+      "weight": "grams",
+      "max_power": "watts",
+      "max_current": "amps",
+      "resistance": "milliohms",
+      "diameter": "mm",
+      "length": "mm",
+      "shaft_diameter": "mm",
+      "price": "INR"
+    }
+  },
+  "motors": [
+    {
+      "id": "EMAX_RS2205_2300",
+      "manufacturer": "EMAX",
+      "model": "RS2205",
+      "kv": 2300,
+      "weight_g": 28,
+      "max_power_w": 430,
+      "max_current_a": 30,
+      "resistance_mohm": 72,
+      "idle_current_a": 0.7,
+      "diameter_mm": 27.9,
+      "length_mm": 31.7,
+      "shaft_diameter_mm": 5,
+      "mounting_pattern_mm": 16,
+      "poles": 14,
+      "magnets": 12,
+      "bearing_type": "EZO",
+      "application": ["fpv_racing", "freestyle"],
+      "battery_cells": [3, 4],
+      "recommended_props_in": [5, 5.1],
+      "max_thrust_g": 920,
+      "efficiency_g_per_w": 5.8,
+      "price_inr": 1800,
+      "purchase_links": [
+        "https://www.quadkopters.com/product/motors/emax-rs2205-2300kv",
+        "https://www.robu.in/product/emax-rs2205-2300kv"
+      ],
+      "datasheet_url": "https://emaxmodel.com/products/rs2205",
+      "availability": "in_stock"
+    },
+    {
+      "id": "TMOTOR_U5_400",
+      "manufacturer": "T-Motor",
+      "model": "U5",
+      "kv": 400,
+      "weight_g": 95,
+      "max_power_w": 540,
+      "max_current_a": 24,
+      "resistance_mohm": 98,
+      "idle_current_a": 0.5,
+      "diameter_mm": 56,
+      "length_mm": 26,
+      "shaft_diameter_mm": 6,
+      "mounting_pattern_mm": 25,
+      "poles": 24,
+      "magnets": 22,
+      "bearing_type": "NSK",
+      "application": ["cinematography", "mapping", "inspection"],
+      "battery_cells": [6],
+      "recommended_props_in": [15, 16, 17],
+      "max_thrust_g": 2800,
+      "efficiency_g_per_w": 8.5,
+      "price_inr": 8500,
+      "purchase_links": [
+        "https://www.tmotor.com/product/u5-motor",
+        "https://www.getfpv.com/t-motor-u5-motor.html"
+      ],
+      "datasheet_url": "https://store.tmotor.com/goods.php?id=436",
+      "availability": "in_stock"
+    },
+    {
+      "id": "TMOTOR_MN501S_360",
+      "manufacturer": "T-Motor",
+      "model": "MN501-S",
+      "kv": 360,
+      "weight_g": 112,
+      "max_power_w": 680,
+      "max_current_a": 28,
+      "resistance_mohm": 65,
+      "idle_current_a": 0.4,
+      "diameter_mm": 57.7,
+      "length_mm": 32,
+      "shaft_diameter_mm": 6,
+      "mounting_pattern_mm": 25,
+      "poles": 24,
+      "magnets": 22,
+      "bearing_type": "NSK",
+      "application": ["agriculture", "heavy_lift", "industrial"],
+      "battery_cells": [6, 12],
+      "recommended_props_in": [17, 18, 20],
+      "max_thrust_g": 4200,
+      "efficiency_g_per_w": 9.2,
+      "price_inr": 12000,
+      "purchase_links": [
+        "https://www.tmotor.com/product/mn501-s"
+      ],
+      "datasheet_url": "https://store.tmotor.com/goods.php?id=738",
+      "availability": "in_stock"
+    },
+    {
+      "id": "TMOTOR_U8II_100",
+      "manufacturer": "T-Motor",
+      "model": "U8 II",
+      "kv": 100,
+      "weight_g": 240,
+      "max_power_w": 1200,
+      "max_current_a": 50,
+      "resistance_mohm": 28,
+      "idle_current_a": 0.5,
+      "diameter_mm": 86.5,
+      "length_mm": 32,
+      "shaft_diameter_mm": 8,
+      "mounting_pattern_mm": 44,
+      "poles": 36,
+      "magnets": 42,
+      "bearing_type": "NSK",
+      "application": ["heavy_lift", "agriculture", "cargo"],
+      "battery_cells": [12, 14],
+      "recommended_props_in": [27, 28, 29, 30],
+      "max_thrust_g": 12000,
+      "efficiency_g_per_w": 11.5,
+      "price_inr": 35000,
+      "purchase_links": [
+        "https://www.tmotor.com/product/u8-ii-motor"
+      ],
+      "datasheet_url": "https://store.tmotor.com/goods.php?id=982",
+      "availability": "in_stock"
+    },
+    {
+      "id": "HOBBYWING_X8_135",
+      "manufacturer": "Hobbywing",
+      "model": "X8",
+      "kv": 135,
+      "weight_g": 480,
+      "max_power_w": 3200,
+      "max_current_a": 80,
+      "resistance_mohm": 18,
+      "idle_current_a": 0.8,
+      "diameter_mm": 99.5,
+      "length_mm": 47,
+      "shaft_diameter_mm": 12,
+      "mounting_pattern_mm": 66,
+      "poles": 40,
+      "magnets": 36,
+      "bearing_type": "Japan NMB",
+      "application": ["agriculture", "heavy_lift", "cargo"],
+      "battery_cells": [12, 14],
+      "recommended_props_in": [30, 32, 34],
+      "max_thrust_g": 18000,
+      "efficiency_g_per_w": 10.8,
+      "price_inr": 42000,
+      "purchase_links": [
+        "https://www.hobbywing.com/products/x8"
+      ],
+      "datasheet_url": "https://www.hobbywing.com/products/x8/datasheet",
+      "availability": "in_stock"
+    },
+    {
+      "id": "SUNNYSKY_X2212_980",
+      "manufacturer": "SunnySky",
+      "model": "X2212",
+      "kv": 980,
+      "weight_g": 56,
+      "max_power_w": 240,
+      "max_current_a": 18,
+      "resistance_mohm": 85,
+      "idle_current_a": 0.4,
+      "diameter_mm": 27.5,
+      "length_mm": 26,
+      "shaft_diameter_mm": 3.17,
+      "mounting_pattern_mm": 16,
+      "poles": 14,
+      "magnets": 12,
+      "bearing_type": "NMB",
+      "application": ["trainer", "mapping", "light_cargo"],
+      "battery_cells": [3, 4],
+      "recommended_props_in": [9, 10, 11],
+      "max_thrust_g": 850,
+      "efficiency_g_per_w": 7.2,
+      "price_inr": 1200,
+      "purchase_links": [
+        "https://www.robu.in/product/sunnysky-x2212-980kv"
+      ],
+      "datasheet_url": "https://sunnyskyusa.com/products/x2212",
+      "availability": "in_stock"
+    },
+    {
+      "id": "BROTHERHOBBY_AVENGER_2806_1300",
+      "manufacturer": "BrotherHobby",
+      "model": "Avenger 2806.5",
+      "kv": 1300,
+      "weight_g": 42,
+      "max_power_w": 680,
+      "max_current_a": 45,
+      "resistance_mohm": 42,
+      "idle_current_a": 1.0,
+      "diameter_mm": 32.5,
+      "length_mm": 16,
+      "shaft_diameter_mm": 5,
+      "mounting_pattern_mm": 19,
+      "poles": 12,
+      "magnets": 14,
+      "bearing_type": "NSK",
+      "application": ["fpv_racing", "long_range", "freestyle"],
+      "battery_cells": [4, 6],
+      "recommended_props_in": [6, 7],
+      "max_thrust_g": 1800,
+      "efficiency_g_per_w": 6.5,
+      "price_inr": 2800,
+      "purchase_links": [
+        "https://www.getfpv.com/brotherhobby-avenger-2806-5"
+      ],
+      "datasheet_url": "https://www.brotherhobbystore.com/avenger-2806-5",
+      "availability": "in_stock"
+    },
+    {
+      "id": "DJI_2312E_960",
+      "manufacturer": "DJI",
+      "model": "2312E",
+      "kv": 960,
+      "weight_g": 60,
+      "max_power_w": 350,
+      "max_current_a": 20,
+      "resistance_mohm": 75,
+      "idle_current_a": 0.5,
+      "diameter_mm": 28,
+      "length_mm": 25,
+      "shaft_diameter_mm": 3,
+      "mounting_pattern_mm": 16,
+      "poles": 14,
+      "magnets": 12,
+      "bearing_type": "Premium",
+      "application": ["cinematography", "prosumer"],
+      "battery_cells": [3, 4],
+      "recommended_props_in": [9.4, 10],
+      "max_thrust_g": 900,
+      "efficiency_g_per_w": 7.8,
+      "price_inr": 3500,
+      "purchase_links": [
+        "https://store.dji.com/product/e310-2312e-motor"
+      ],
+      "datasheet_url": "https://www.dji.com/e310",
+      "availability": "in_stock"
+    },
+    {
+      "id": "TMOTOR_P60_170",
+      "manufacturer": "T-Motor",
+      "model": "P60",
+      "kv": 170,
+      "weight_g": 420,
+      "max_power_w": 2400,
+      "max_current_a": 65,
+      "resistance_mohm": 22,
+      "idle_current_a": 0.6,
+      "diameter_mm": 82,
+      "length_mm": 42,
+      "shaft_diameter_mm": 10,
+      "mounting_pattern_mm": 55,
+      "poles": 36,
+      "magnets": 42,
+      "bearing_type": "NSK",
+      "application": ["agriculture", "heavy_lift", "industrial"],
+      "battery_cells": [12, 14],
+      "recommended_props_in": [26, 27, 28],
+      "max_thrust_g": 14000,
+      "efficiency_g_per_w": 10.2,
+      "price_inr": 28000,
+      "purchase_links": [
+        "https://www.tmotor.com/product/p60-motor"
+      ],
+      "datasheet_url": "https://store.tmotor.com/goods.php?id=965",
+      "availability": "in_stock"
+    },
+    {
+      "id": "GARTT_ML5008_330",
+      "manufacturer": "GARTT",
+      "model": "ML5008",
+      "kv": 330,
+      "weight_g": 138,
+      "max_power_w": 800,
+      "max_current_a": 25,
+      "resistance_mohm": 52,
+      "idle_current_a": 0.5,
+      "diameter_mm": 60,
+      "length_mm": 28,
+      "shaft_diameter_mm": 6,
+      "mounting_pattern_mm": 32,
+      "poles": 24,
+      "magnets": 22,
+      "bearing_type": "NSK",
+      "application": ["cinematography", "mapping", "light_industrial"],
+      "battery_cells": [6],
+      "recommended_props_in": [15, 16, 17, 18],
+      "max_thrust_g": 3800,
+      "efficiency_g_per_w": 8.8,
+      "price_inr": 5500,
+      "purchase_links": [
+        "https://www.aliexpress.com/item/gartt-ml5008"
+      ],
+      "datasheet_url": "https://www.gartt.com/ml5008",
+      "availability": "in_stock"
+    },
+    {
+      "id": "XING_2806_1800",
+      "manufacturer": "iFlight",
+      "model": "XING2 2806.5",
+      "kv": 1800,
+      "weight_g": 41.5,
+      "max_power_w": 720,
+      "max_current_a": 48,
+      "resistance_mohm": 38,
+      "idle_current_a": 0.9,
+      "diameter_mm": 32,
+      "length_mm": 15.5,
+      "shaft_diameter_mm": 5,
+      "mounting_pattern_mm": 19,
+      "poles": 12,
+      "magnets": 14,
+      "bearing_type": "NSK",
+      "application": ["fpv_racing", "freestyle"],
+      "battery_cells": [4, 6],
+      "recommended_props_in": [5, 5.1, 6],
+      "max_thrust_g": 1650,
+      "efficiency_g_per_w": 5.9,
+      "price_inr": 2400,
+      "purchase_links": [
+        "https://shop.iflight-rc.com/xing2-2806-5"
+      ],
+      "datasheet_url": "https://shop.iflight-rc.com/xing2-2806-5-motor",
+      "availability": "in_stock"
+    }
+  ],
+  "selection_guidelines": {
+    "by_application": {
+      "fpv_racing": {
+        "kv_range": [1800, 2700],
+        "weight_range_g": [25, 45],
+        "power_range_w": [400, 800],
+        "recommended_ids": ["EMAX_RS2205_2300", "XING_2806_1800", "BROTHERHOBBY_AVENGER_2806_1300"]
+      },
+      "cinematography": {
+        "kv_range": [300, 1000],
+        "weight_range_g": [50, 150],
+        "power_range_w": [200, 700],
+        "recommended_ids": ["TMOTOR_U5_400", "DJI_2312E_960", "GARTT_ML5008_330"]
+      },
+      "agriculture_light": {
+        "kv_range": [300, 500],
+        "weight_range_g": [80, 200],
+        "power_range_w": [500, 1000],
+        "recommended_ids": ["TMOTOR_MN501S_360", "TMOTOR_U5_400"]
+      },
+      "agriculture_heavy": {
+        "kv_range": [100, 200],
+        "weight_range_g": [200, 500],
+        "power_range_w": [1000, 3500],
+        "recommended_ids": ["TMOTOR_U8II_100", "HOBBYWING_X8_135", "TMOTOR_P60_170"]
+      },
+      "mapping": {
+        "kv_range": [400, 1000],
+        "weight_range_g": [40, 120],
+        "power_range_w": [200, 600],
+        "recommended_ids": ["SUNNYSKY_X2212_980", "TMOTOR_U5_400"]
+      },
+      "heavy_lift": {
+        "kv_range": [100, 200],
+        "weight_range_g": [200, 600],
+        "power_range_w": [1200, 4000],
+        "recommended_ids": ["TMOTOR_U8II_100", "HOBBYWING_X8_135", "TMOTOR_P60_170"]
+      }
+    },
+    "by_thrust_requirement": {
+      "under_1kg": {
+        "motors": ["EMAX_RS2205_2300", "SUNNYSKY_X2212_980"]
+      },
+      "1kg_to_3kg": {
+        "motors": ["BROTHERHOBBY_AVENGER_2806_1300", "TMOTOR_U5_400"]
+      },
+      "3kg_to_5kg": {
+        "motors": ["TMOTOR_MN501S_360", "GARTT_ML5008_330"]
+      },
+      "5kg_to_15kg": {
+        "motors": ["TMOTOR_U8II_100", "TMOTOR_P60_170"]
+      },
+      "above_15kg": {
+        "motors": ["HOBBYWING_X8_135"]
+      }
+    }
+  }
+}

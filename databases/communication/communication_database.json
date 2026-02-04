@@ -1,0 +1,185 @@
+{
+  "metadata": {
+    "version": "1.0.0",
+    "last_updated": "2026-01-15",
+    "description": "RC receivers, telemetry, and communication systems"
+  },
+  "receivers": [
+    {
+      "id": "tbs_crossfire_nano",
+      "brand": "TBS",
+      "model": "Crossfire Nano RX",
+      "protocol": "TBS Crossfire",
+      "specs": {
+        "frequency_mhz": 900,
+        "range_km": 40,
+        "channels": 12,
+        "weight_g": 1.5,
+        "voltage_v": "3.5-8.4",
+        "latency_ms": 4,
+        "telemetry": true
+      },
+      "features": ["Long range", "Low latency", "Telemetry"],
+      "price_usd": 30,
+      "availability": "in_stock"
+    },
+    {
+      "id": "expresslrs_nano",
+      "brand": "Various",
+      "model": "ExpressLRS 2.4GHz Nano",
+      "protocol": "ExpressLRS",
+      "specs": {
+        "frequency_mhz": 2400,
+        "range_km": 30,
+        "channels": 16,
+        "weight_g": 1.2,
+        "voltage_v": "3.3-5.0",
+        "latency_ms": 2,
+        "telemetry": true
+      },
+      "features": ["Open source", "Very low latency", "Lightweight"],
+      "price_usd": 18,
+      "availability": "in_stock"
+    },
+    {
+      "id": "frsky_r9_slim",
+      "brand": "FrSky",
+      "model": "R9 Slim+",
+      "protocol": "FrSky ACCESS",
+      "specs": {
+        "frequency_mhz": 900,
+        "range_km": 15,
+        "channels": 16,
+        "weight_g": 6.8,
+        "voltage_v": "3.5-10",
+        "latency_ms": 9,
+        "telemetry": true
+      },
+      "features": ["OTA update", "Redundancy"],
+      "price_usd": 40,
+      "availability": "in_stock"
+    },
+    {
+      "id": "radiomaster_er8",
+      "brand": "RadioMaster",
+      "model": "ER8",
+      "protocol": "ExpressLRS",
+      "specs": {
+        "frequency_mhz": 2400,
+        "range_km": 25,
+        "channels": 8,
+        "weight_g": 8,
+        "voltage_v": "4.5-8.4",
+        "latency_ms": 2,
+        "telemetry": true
+      },
+      "features": ["PWM outputs", "Budget friendly"],
+      "price_usd": 22,
+      "availability": "in_stock"
+    }
+  ],
+  "telemetry_modules": [
+    {
+      "id": "holybro_sik_v3",
+      "brand": "Holybro",
+      "model": "SiK Telemetry V3",
+      "specs": {
+        "frequency_mhz": 915,
+        "range_km": 5,
+        "data_rate_kbps": 250,
+        "power_dbm": 20,
+        "weight_g": 25,
+        "voltage_v": "5.0",
+        "interface": "UART"
+      },
+      "features": ["MAVLink", "Air+Ground pair", "AES encryption"],
+      "price_usd": 65,
+      "availability": "in_stock"
+    },
+    {
+      "id": "rfd900x",
+      "brand": "RFDesign",
+      "model": "RFD900x",
+      "specs": {
+        "frequency_mhz": 900,
+        "range_km": 40,
+        "data_rate_kbps": 500,
+        "power_dbm": 30,
+        "weight_g": 35,
+        "voltage_v": "5.0",
+        "interface": "UART"
+      },
+      "features": ["Long range", "High power", "MAVLink"],
+      "price_usd": 280,
+      "availability": "in_stock"
+    },
+    {
+      "id": "herelink_2.1",
+      "brand": "CubePilot",
+      "model": "HereLink 2.1",
+      "specs": {
+        "frequency_mhz": 2400,
+        "range_km": 20,
+        "video_resolution": "1080p",
+        "data_rate_mbps": 20,
+        "weight_g": 340,
+        "voltage_v": "5.0-12.6"
+      },
+      "features": ["HD video", "Touch controller", "App control"],
+      "price_usd": 999,
+      "availability": "in_stock"
+    }
+  ],
+  "video_transmitters": [
+    {
+      "id": "dji_o3_air_unit",
+      "brand": "DJI",
+      "model": "O3 Air Unit",
+      "specs": {
+        "frequency_mhz": 5800,
+        "range_km": 10,
+        "resolution": "1080p120",
+        "latency_ms": 30,
+        "power_mw": [25, 200, 500, 1200],
+        "weight_g": 42,
+        "voltage_v": "7.4-26.4"
+      },
+      "features": ["Digital HD", "Low latency", "OSD"],
+      "price_usd": 179,
+      "availability": "in_stock"
+    },
+    {
+      "id": "walksnail_avatar",
+      "brand": "Caddx",
+      "model": "Walksnail Avatar HD",
+      "specs": {
+        "frequency_mhz": 5800,
+        "range_km": 4,
+        "resolution": "1080p60",
+        "latency_ms": 22,
+        "power_mw": [25, 200, 400, 1000],
+        "weight_g": 28,
+        "voltage_v": "7.4-25.2"
+      },
+      "features": ["Open VTX protocol", "Low latency"],
+      "price_usd": 140,
+      "availability": "in_stock"
+    },
+    {
+      "id": "rush_tank_ultimate",
+      "brand": "Rush",
+      "model": "Tank Ultimate",
+      "specs": {
+        "frequency_mhz": 5800,
+        "range_km": 2,
+        "resolution": "analog",
+        "power_mw": [25, 200, 500, 800, 1600],
+        "weight_g": 12,
+        "voltage_v": "7-26"
+      },
+      "features": ["High power analog", "Budget"],
+      "price_usd": 28,
+      "availability": "in_stock"
+    }
+  ]
+}

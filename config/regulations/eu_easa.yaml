@@ -1,0 +1,405 @@
+# EU EASA (European Union Aviation Safety Agency) Drone Regulations
+# Updated: January 2026
+
+jurisdiction:
+  name: "European Union"
+  authority: "European Union Aviation Safety Agency (EASA)"
+  governing_rules: "EU Regulation 2019/947, 2019/945, Delegated & Implementing Regulations"
+  member_states: 27
+  note: "Applies to all EU member states plus Norway, Iceland, Liechtenstein, Switzerland"
+
+# =============================================================================
+# OPERATIONAL CATEGORIES
+# =============================================================================
+categories:
+  open:
+    name: "Open Category"
+    description: "Low-risk operations, no authorization required"
+    max_height_m: 120
+    vlos_required: true
+    maximum_takeoff_mass_kg: 25
+    
+    subcategories:
+      a1:
+        name: "A1 - Fly over people"
+        allowed_drones: ["C0", "C1", "legacy_under_250g"]
+        operations:
+          - "May fly over uninvolved people but not over assemblies"
+          - "C0: May fly over uninvolved people"
+          - "C1: Fly over people briefly, never over assemblies"
+        pilot_requirements:
+          - "Complete online training"
+          - "Pass online knowledge exam"
+        minimum_age: 12
+        
+      a2:
+        name: "A2 - Fly close to people"
+        allowed_drones: ["C2"]
+        operations:
+          - "Keep safe horizontal distance from uninvolved people (30m)"
+          - "In low-speed mode: 5m horizontal distance"
+          - "Never over assemblies of people"
+        pilot_requirements:
+          - "A1/A3 certificate"
+          - "Self-practical training"
+          - "Pass additional knowledge exam at exam center"
+        minimum_age: 16
+        
+      a3:
+        name: "A3 - Fly far from people"
+        allowed_drones: ["C0", "C1", "C2", "C3", "C4", "legacy_under_25kg"]
+        operations:
+          - "Fly in area where no uninvolved people expected"
+          - "150m horizontal distance from residential, commercial, industrial areas"
+        pilot_requirements:
+          - "Complete online training"
+          - "Pass online knowledge exam"
+        minimum_age: 12
+
+  specific:
+    name: "Specific Category"
+    description: "Medium-risk operations, authorization required"
+    authorization_types:
+      operational_authorization:
+        name: "Operational Authorization"
+        description: "Specific approval for operation"
+        sora_required: true
+        risk_assessment: "Specific Operations Risk Assessment (SORA)"
+        
+      standard_scenarios:
+        name: "Standard Scenarios (STS)"
+        description: "Pre-defined scenarios with declaration"
+        available_scenarios:
+          sts_01:
+            name: "STS-01"
+            description: "VLOS over controlled ground area in populated environment"
+            max_height_m: 120
+            max_distance_m: "VLOS"
+            drones: ["C5"]
+            population: "Populated areas"
+            
+          sts_02:
+            name: "STS-02"
+            description: "BVLOS over controlled ground area in sparsely populated environment"
+            max_height_m: 120
+            max_distance_m: 2000
+            drones: ["C6"]
+            population: "Sparsely populated"
+            observers: "May be required"
+            
+      luz:
+        name: "Light UAS Operator Certificate (LUC)"
+        description: "Self-authorize specific category operations"
+        requirements:
+          - "Safety management system"
+          - "Competent personnel"
+          - "Operating procedures"
+          
+  certified:
+    name: "Certified Category"
+    description: "High-risk operations, full certification required"
+    when_required:
+      - "Operations over assemblies of people"
+      - "Transport of people"
+      - "Transport of dangerous goods"
+      - "Dimensions >3m in characteristic dimension"
+    requirements:
+      - "Type certificate for UAS"
+      - "Remote pilot license"
+      - "Operator certificate"
+
+# =============================================================================
+# DRONE CLASSES (C-MARKING)
+# =============================================================================
+drone_classes:
+  c0:
+    name: "Class C0"
+    max_mtom_kg: 0.250
+    max_speed_ms: 19
+    max_height_m: 120
+    requirements:
+      - "Unique serial number"
+      - "CE marking"
+      - "Class identification label (C0)"
+      - "User manual"
+    features_required:
+      remote_id: false
+      geo_awareness: false
+      lights: false
+      
+  c1:
+    name: "Class C1"
+    max_mtom_kg: 0.900
+    max_speed_ms: 19
+    max_height_m: 120
+    kinetic_energy_limit_j: 80
+    requirements:
+      - "Unique serial number"
+      - "CE marking"
+      - "Class identification label (C1)"
+      - "Operator registration number entry"
+      - "User manual with noise level"
+    features_required:
+      remote_id: true
+      geo_awareness: true
+      lights: "For night operations"
+      
+  c2:
+    name: "Class C2"
+    max_mtom_kg: 4.0
+    max_speed_ms: "No limit"
+    max_height_m: 120
+    requirements:
+      - "Unique serial number"
+      - "CE marking"
+      - "Class identification label (C2)"
+      - "Operator registration number entry"
+      - "Low-speed mode (max 3 m/s)"
+      - "User manual with noise level"
+    features_required:
+      remote_id: true
+      geo_awareness: true
+      lights: "For night operations"
+      
+  c3:
+    name: "Class C3"
+    max_mtom_kg: 25.0
+    max_dimension_m: 3.0
+    max_height_m: 120
+    requirements:
+      - "Unique serial number"
+      - "CE marking"
+      - "Class identification label (C3)"
+      - "Operator registration number entry"
+      - "User manual with noise level"
+    features_required:
+      remote_id: true
+      geo_awareness: true
+      lights: "For night operations"
+      
+  c4:
+    name: "Class C4"
+    max_mtom_kg: 25.0
+    description: "Designed for model aircraft"
+    max_height_m: 120
+    requirements:
+      - "Unique serial number"
+      - "CE marking"
+      - "Class identification label (C4)"
+      - "User manual"
+    features_required:
+      remote_id: false
+      geo_awareness: false
+      
+  c5:
+    name: "Class C5"
+    max_mtom_kg: 25.0
+    description: "For STS-01 operations"
+    requirements:
+      - "All C3 requirements"
+      - "1:1 controllable hover/low speed mode"
+      - "Guaranteed drone hovering performance"
+      - "Geo-awareness for height and position"
+    features_required:
+      remote_id: true
+      geo_awareness: true
+      ground_area_control: true
+      
+  c6:
+    name: "Class C6"
+    max_mtom_kg: 25.0
+    description: "For STS-02 BVLOS operations"
+    requirements:
+      - "All C3 requirements"
+      - "Command and control link monitoring"
+      - "Data link and range indication"
+      - "Emergency recovery capability"
+    features_required:
+      remote_id: true
+      geo_awareness: true
+      command_control_monitoring: true
+
+# =============================================================================
+# REGISTRATION
+# =============================================================================
+registration:
+  operators:
+    required: true
+    threshold_kg: 0.250
+    threshold_camera: "Any drone with camera regardless of weight"
+    national_registry: true
+    operator_id_format: "Country-specific"
+    requirements:
+      individual:
+        - "Name"
+        - "Date of birth"
+        - "Address"
+        - "Email"
+        - "Phone number"
+      legal_entity:
+        - "Company name"
+        - "Registration number"
+        - "Address"
+        - "Contact person"
+        - "Email"
+        - "Phone number"
+        
+  marking:
+    location: "Visible on drone"
+    content: "Operator registration number"
+    method: "Label, engraving, or digital upload to drone"
+
+# =============================================================================
+# PILOT COMPETENCY
+# =============================================================================
+pilot_competency:
+  a1_a3:
+    name: "A1/A3 Certificate"
+    method: "Online training and exam"
+    validity_years: 5
+    minimum_questions: 40
+    passing_score_percent: 75
+    topics:
+      - "Aviation safety"
+      - "Airspace restrictions"
+      - "Regulations"
+      - "Human factors"
+      - "Operational procedures"
+      - "Technical and operational mitigations"
+      - "UAS general knowledge"
+      - "Privacy and data protection"
+      - "Insurance"
+      - "Security"
+      
+  a2:
+    name: "A2 Certificate"
+    prerequisites: "A1/A3 certificate"
+    method: "Theory exam at examination center"
+    practical: "Self-training and declaration"
+    validity_years: 5
+    additional_topics:
+      - "Meteorology"
+      - "UAS flight performance"
+      - "Technical and operational mitigations for ground risk"
+      
+  specific_category:
+    name: "Specific Category Pilot Competency"
+    defined_by: "Operational authorization or STS requirements"
+    
+  sts_pilots:
+    theoretical_knowledge: "Enhanced theory course"
+    practical_skill: "Practical skill assessment"
+    validity_years: 5
+
+# =============================================================================
+# REMOTE IDENTIFICATION
+# =============================================================================
+remote_id:
+  name: "Direct Remote Identification"
+  required_for: ["C1", "C2", "C3", "C5", "C6"]
+  broadcast_data:
+    - "UAS operator registration number"
+    - "Unique serial number"
+    - "Time stamp"
+    - "Geographic position"
+    - "Route course (ground track)"
+    - "Ground speed"
+    - "Height above surface or take-off point"
+  method: "Direct periodic broadcast using open, documented transmission protocol"
+
+# =============================================================================
+# GEO-AWARENESS
+# =============================================================================
+geo_awareness:
+  required_for: ["C1", "C2", "C3", "C5", "C6"]
+  functionality:
+    - "Upload geo-limitation zones"
+    - "Alert when approaching geo-zones"
+    - "Prevent entry into no-fly zones"
+  data_source: "National geo-awareness databases"
+  update_requirement: "Regular updates from official sources"
+
+# =============================================================================
+# AIRSPACE
+# =============================================================================
+airspace:
+  uas_geographical_zones:
+    description: "Defined by Member States"
+    types:
+      - "Prohibited zones (e.g., airports, military)"
+      - "Restricted zones"
+      - "Remote ID only zones"
+      - "No-fly zones"
+    information_source: "National aeronautical information services"
+    
+  u_space:
+    name: "U-space"
+    description: "European framework for drone traffic management"
+    services:
+      - "Network identification"
+      - "Geo-awareness"
+      - "Flight authorization"
+      - "Traffic information"
+      - "Weather information"
+      - "Conformance monitoring"
+
+# =============================================================================
+# OPERATIONS
+# =============================================================================
+operations:
+  general_limitations:
+    max_height_agl_m: 120
+    visual_line_of_sight: true
+    single_drone_rule: true  # One pilot, one drone (unless authorized)
+    
+  night_operations:
+    open_category: "Allowed with lights visible from ground"
+    specific_category: "As per authorization"
+    
+  minimum_distances:
+    assemblies_of_people: "Never in Open Category (except C0)"
+    uninvolved_persons: "Depends on subcategory (A1, A2, A3)"
+    
+  operating_altitudes:
+    default_max_m: 120
+    lower_in_zones: "As per UAS geographical zones"
+    higher: "Only with authorization"
+
+# =============================================================================
+# INSURANCE
+# =============================================================================
+insurance:
+  required: true
+  regulation: "EC Regulation 785/2004"
+  minimum_coverage:
+    third_party_liability: true
+    amounts: "Varies by Member State"
+  applies_to: "All drones used commercially and many recreational uses"
+
+# =============================================================================
+# MODEL AIRCRAFT / CLUBS
+# =============================================================================
+model_aircraft:
+  authorization: "National authorizations for clubs and associations"
+  privileges:
+    - "May operate under club rules"
+    - "Height limits may vary"
+    - "Different competency requirements"
+  supervision: "Experienced members may supervise beginners"
+
+# =============================================================================
+# TRANSITION PROVISIONS
+# =============================================================================
+transition:
+  legacy_drones:
+    description: "Drones built before class marking requirements"
+    provisions:
+      under_250g: "May operate in A1 under specific conditions"
+      250g_to_500g: "May operate in A1 under specific conditions until 2024"
+      500g_to_2kg: "May operate in A3 under specific conditions"
+      2kg_to_25kg: "May operate in A3 under specific conditions"
+    expiry: "Most transitional provisions ended 2023-2024"
+    
+  operators:
+    existing_authorizations: "Converted to new framework"
+    national_variations: "Some Member States have additional requirements"

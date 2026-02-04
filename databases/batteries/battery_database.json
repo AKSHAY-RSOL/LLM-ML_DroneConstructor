@@ -1,0 +1,304 @@
+{
+  "metadata": {
+    "version": "1.0.0",
+    "last_updated": "2026-01-15",
+    "description": "Battery database for drone applications",
+    "units": {
+      "capacity": "mAh",
+      "voltage_nominal": "V",
+      "weight": "grams",
+      "dimensions": "mm",
+      "price": "INR"
+    }
+  },
+  "batteries": [
+    {
+      "id": "TATTU_R1300_4S",
+      "manufacturer": "Tattu",
+      "model": "R-Line Version 5.0",
+      "chemistry": "LiPo",
+      "capacity_mah": 1300,
+      "cell_count": 4,
+      "voltage_nominal_v": 14.8,
+      "voltage_max_v": 16.8,
+      "voltage_min_v": 13.2,
+      "c_rating_continuous": 150,
+      "c_rating_burst": 300,
+      "weight_g": 188,
+      "dimensions_mm": {"l": 75, "w": 35, "h": 35},
+      "connector": "XT60",
+      "balance_connector": "JST-XH",
+      "internal_resistance_mohm": 1.8,
+      "application": ["fpv_racing", "freestyle"],
+      "cycle_life": 300,
+      "price_inr": 4500,
+      "purchase_links": [
+        "https://www.tattu.com/r-line-5-0-1300mah"
+      ],
+      "availability": "in_stock"
+    },
+    {
+      "id": "TATTU_6750_6S",
+      "manufacturer": "Tattu",
+      "model": "Plus 6750mAh 6S",
+      "chemistry": "LiPo",
+      "capacity_mah": 6750,
+      "cell_count": 6,
+      "voltage_nominal_v": 22.2,
+      "voltage_max_v": 25.2,
+      "voltage_min_v": 19.8,
+      "c_rating_continuous": 25,
+      "c_rating_burst": 50,
+      "weight_g": 850,
+      "dimensions_mm": {"l": 165, "w": 65, "h": 45},
+      "connector": "XT90",
+      "balance_connector": "JST-XH",
+      "internal_resistance_mohm": 3.5,
+      "application": ["cinematography", "mapping", "long_endurance"],
+      "cycle_life": 400,
+      "price_inr": 12000,
+      "purchase_links": [
+        "https://www.tattu.com/tattu-plus-6750mah-6s"
+      ],
+      "availability": "in_stock"
+    },
+    {
+      "id": "TATTU_16000_6S",
+      "manufacturer": "Tattu",
+      "model": "16000mAh 6S",
+      "chemistry": "LiPo",
+      "capacity_mah": 16000,
+      "cell_count": 6,
+      "voltage_nominal_v": 22.2,
+      "voltage_max_v": 25.2,
+      "voltage_min_v": 19.8,
+      "c_rating_continuous": 15,
+      "c_rating_burst": 30,
+      "weight_g": 1750,
+      "dimensions_mm": {"l": 195, "w": 75, "h": 65},
+      "connector": "AS150",
+      "balance_connector": "JST-XH",
+      "internal_resistance_mohm": 4.2,
+      "application": ["heavy_lift", "agriculture_light"],
+      "cycle_life": 500,
+      "price_inr": 28000,
+      "purchase_links": [
+        "https://www.tattu.com/tattu-16000mah-6s"
+      ],
+      "availability": "in_stock"
+    },
+    {
+      "id": "TATTU_22000_12S",
+      "manufacturer": "Tattu",
+      "model": "22000mAh 12S",
+      "chemistry": "LiPo",
+      "capacity_mah": 22000,
+      "cell_count": 12,
+      "voltage_nominal_v": 44.4,
+      "voltage_max_v": 50.4,
+      "voltage_min_v": 39.6,
+      "c_rating_continuous": 25,
+      "c_rating_burst": 50,
+      "weight_g": 4850,
+      "dimensions_mm": {"l": 215, "w": 105, "h": 75},
+      "connector": "AS150",
+      "balance_connector": "JST-XH",
+      "internal_resistance_mohm": 2.8,
+      "application": ["agriculture", "heavy_lift", "industrial"],
+      "cycle_life": 400,
+      "price_inr": 85000,
+      "purchase_links": [
+        "https://www.tattu.com/tattu-22000mah-12s"
+      ],
+      "availability": "in_stock"
+    },
+    {
+      "id": "GENSTAT_10000_6S",
+      "manufacturer": "Gens Ace",
+      "model": "Tattu 10000mAh 6S",
+      "chemistry": "LiPo",
+      "capacity_mah": 10000,
+      "cell_count": 6,
+      "voltage_nominal_v": 22.2,
+      "voltage_max_v": 25.2,
+      "voltage_min_v": 19.8,
+      "c_rating_continuous": 25,
+      "c_rating_burst": 50,
+      "weight_g": 1280,
+      "dimensions_mm": {"l": 175, "w": 72, "h": 52},
+      "connector": "XT90",
+      "balance_connector": "JST-XH",
+      "internal_resistance_mohm": 3.8,
+      "application": ["cinematography", "mapping", "inspection"],
+      "cycle_life": 400,
+      "price_inr": 18000,
+      "purchase_links": [
+        "https://www.gensace.de/tattu-10000mah-6s"
+      ],
+      "availability": "in_stock"
+    },
+    {
+      "id": "MAXAMPS_44000_12S",
+      "manufacturer": "MaxAmps",
+      "model": "44000mAh 12S LiPo",
+      "chemistry": "LiPo",
+      "capacity_mah": 44000,
+      "cell_count": 12,
+      "voltage_nominal_v": 44.4,
+      "voltage_max_v": 50.4,
+      "voltage_min_v": 39.6,
+      "c_rating_continuous": 20,
+      "c_rating_burst": 40,
+      "weight_g": 9200,
+      "dimensions_mm": {"l": 280, "w": 140, "h": 85},
+      "connector": "QS8",
+      "balance_connector": "JST-XH",
+      "internal_resistance_mohm": 2.2,
+      "application": ["agriculture_heavy", "cargo"],
+      "cycle_life": 350,
+      "price_inr": 165000,
+      "purchase_links": [
+        "https://www.maxamps.com/44000mah-12s"
+      ],
+      "availability": "special_order"
+    },
+    {
+      "id": "TURNIGY_5000_4S",
+      "manufacturer": "Turnigy",
+      "model": "5000mAh 4S 40C",
+      "chemistry": "LiPo",
+      "capacity_mah": 5000,
+      "cell_count": 4,
+      "voltage_nominal_v": 14.8,
+      "voltage_max_v": 16.8,
+      "voltage_min_v": 13.2,
+      "c_rating_continuous": 40,
+      "c_rating_burst": 80,
+      "weight_g": 485,
+      "dimensions_mm": {"l": 145, "w": 48, "h": 38},
+      "connector": "XT60",
+      "balance_connector": "JST-XH",
+      "internal_resistance_mohm": 4.5,
+      "application": ["trainer", "mapping", "budget"],
+      "cycle_life": 300,
+      "price_inr": 4200,
+      "purchase_links": [
+        "https://hobbyking.com/turnigy-5000mah-4s"
+      ],
+      "availability": "in_stock"
+    },
+    {
+      "id": "SAMSUNG_40T_21700",
+      "manufacturer": "Samsung",
+      "model": "40T 21700",
+      "chemistry": "Li-Ion NMC",
+      "capacity_mah": 4000,
+      "cell_count": 1,
+      "voltage_nominal_v": 3.6,
+      "voltage_max_v": 4.2,
+      "voltage_min_v": 2.5,
+      "c_rating_continuous": 8.75,
+      "max_continuous_current_a": 35,
+      "weight_g": 67,
+      "dimensions_mm": {"diameter": 21, "length": 70},
+      "internal_resistance_mohm": 12,
+      "application": ["custom_packs", "long_range", "high_energy_density"],
+      "cycle_life": 500,
+      "price_inr": 650,
+      "purchase_links": [
+        "https://www.18650batterystore.com/samsung-40t"
+      ],
+      "availability": "in_stock",
+      "notes": "Build custom packs with these cells for high energy density"
+    },
+    {
+      "id": "MOLICEL_P42A_21700",
+      "manufacturer": "Molicel",
+      "model": "P42A 21700",
+      "chemistry": "Li-Ion NMC",
+      "capacity_mah": 4200,
+      "cell_count": 1,
+      "voltage_nominal_v": 3.6,
+      "voltage_max_v": 4.2,
+      "voltage_min_v": 2.5,
+      "c_rating_continuous": 10.7,
+      "max_continuous_current_a": 45,
+      "weight_g": 70,
+      "dimensions_mm": {"diameter": 21, "length": 70},
+      "internal_resistance_mohm": 10,
+      "application": ["custom_packs", "long_range", "high_performance"],
+      "cycle_life": 600,
+      "price_inr": 850,
+      "purchase_links": [
+        "https://www.18650batterystore.com/molicel-p42a"
+      ],
+      "availability": "in_stock",
+      "notes": "Premium cells for high-performance custom packs"
+    }
+  ],
+  "selection_guidelines": {
+    "by_application": {
+      "fpv_racing": {
+        "capacity_range_mah": [1000, 1550],
+        "cell_count": [4, 6],
+        "c_rating_min": 100,
+        "priority": "power_density"
+      },
+      "freestyle": {
+        "capacity_range_mah": [1300, 1800],
+        "cell_count": [4, 6],
+        "c_rating_min": 75,
+        "priority": "balance"
+      },
+      "cinematography": {
+        "capacity_range_mah": [5000, 16000],
+        "cell_count": [4, 6],
+        "c_rating_min": 15,
+        "priority": "endurance"
+      },
+      "agriculture_light": {
+        "capacity_range_mah": [10000, 22000],
+        "cell_count": [6],
+        "c_rating_min": 15,
+        "priority": "endurance"
+      },
+      "agriculture_heavy": {
+        "capacity_range_mah": [22000, 50000],
+        "cell_count": [12, 14],
+        "c_rating_min": 15,
+        "priority": "capacity"
+      },
+      "long_range": {
+        "capacity_range_mah": [3000, 8000],
+        "cell_count": [4, 6],
+        "c_rating_min": 10,
+        "chemistry": ["Li-Ion"],
+        "priority": "energy_density"
+      }
+    },
+    "capacity_estimation": {
+      "formula": "capacity_mah = (power_w * flight_time_min * 1000) / (voltage_nominal * efficiency * discharge_factor)",
+      "efficiency": 0.85,
+      "discharge_factor": 0.80,
+      "notes": "Only use 80% of capacity to preserve battery life"
+    }
+  },
+  "safety_guidelines": {
+    "charging": {
+      "max_charge_rate": "1C unless specified otherwise",
+      "storage_voltage_per_cell": 3.8,
+      "never_charge_unattended": true,
+      "use_fireproof_bag": true
+    },
+    "storage": {
+      "temperature_c": {"min": 15, "max": 25},
+      "storage_charge_percent": 50,
+      "check_interval_days": 30
+    },
+    "disposal": {
+      "discharge_fully": true,
+      "recycle_properly": true,
+      "never_puncture": true
+    }
+  }
+}

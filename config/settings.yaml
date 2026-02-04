@@ -1,0 +1,302 @@
+# DroneForge AI - Global Settings
+
+# =============================================================================
+# APPLICATION SETTINGS
+# =============================================================================
+app:
+  name: "DroneForge AI"
+  version: "1.0.0"
+  description: "Autonomous Drone Design System"
+  debug: false
+  log_level: "INFO"
+
+# =============================================================================
+# LLM SETTINGS
+# =============================================================================
+llm:
+  # Default provider: ollama, openai, anthropic, google, azure
+  default_provider: "ollama"
+  
+  # Temperature for generation (0.0 = deterministic, 1.0 = creative)
+  temperature: 0.1
+  
+  # Maximum retries for LLM calls
+  max_retries: 3
+  
+  # Timeout in seconds
+  timeout: 120
+  
+  # Provider-specific settings
+  providers:
+    ollama:
+      base_url: "http://localhost:11434"
+      model: "llama3.1:8b"
+      fallback_model: "llama3.1:8b"
+      
+    openai:
+      model: "gpt-4-turbo"
+      fallback_model: "gpt-4o-mini"
+      # api_key: set via OPENAI_API_KEY env variable
+      
+    anthropic:
+      model: "claude-3-5-sonnet-20241022"
+      fallback_model: "claude-3-haiku-20240307"
+      # api_key: set via ANTHROPIC_API_KEY env variable
+      
+    google:
+      model: "gemini-1.5-pro"
+      fallback_model: "gemini-1.5-flash"
+      # api_key: set via GOOGLE_API_KEY env variable
+      
+    azure:
+      deployment_name: "gpt-4-turbo"
+      api_version: "2024-02-01"
+      # endpoint: set via AZURE_OPENAI_ENDPOINT env variable
+      # api_key: set via AZURE_OPENAI_API_KEY env variable
+
+# =============================================================================
+# DRONE CONFIGURATION
+# =============================================================================
+drone:
+  # Supported types
+  types:
+    multirotor:
+      - tricopter
+      - quadcopter_x
+      - quadcopter_plus
+      - quadcopter_h
+      - hexacopter_x
+      - hexacopter_plus
+      - octocopter_x
+      - octocopter_plus
+      - octocopter_coax
+      
+    fixed_wing:
+      - conventional
+      - flying_wing
+      - canard
+      - biplane
+      - delta
+      
+    vtol:
+      - tiltrotor_quad
+      - tiltrotor_tri
+      - tailsitter
+      - quadplane
+      - lift_cruise
+      
+    hybrid:
+      - compound_helicopter
+      - gyroplane
+      
+  # Default safety margins
+  safety_margins:
+    thrust_to_weight: 2.0  # Minimum T/W ratio
+    structural_factor: 1.5  # Safety factor for structures
+    battery_reserve: 0.20  # 20% reserve capacity
+    current_headroom: 1.25  # ESC current headroom
+    voltage_sag_margin: 0.15  # Max voltage sag tolerance
+
+# =============================================================================
+# USE CASES
+# =============================================================================
+use_cases:
+  agriculture:
+    spraying:
+      typical_payload_kg: [5, 10, 15, 20, 25]
+      flight_time_min: [10, 15, 20, 25, 30]
+      altitude_m: [2, 5, 10]
+      speed_ms: [3, 5, 7]
+    mapping:
+      typical_payload_kg: [0.5, 1, 2]
+      flight_time_min: [20, 30, 45, 60]
+      altitude_m: [50, 100, 150]
+      
+  inspection:
+    infrastructure:
+      typical_payload_kg: [0.5, 1, 2]
+      flight_time_min: [20, 30, 45]
+    powerline:
+      typical_payload_kg: [1, 2, 3]
+      flight_time_min: [30, 45, 60]
+    wind_turbine:
+      typical_payload_kg: [1, 2]
+      flight_time_min: [20, 30]
+      
+  delivery:
+    package:
+      typical_payload_kg: [0.5, 1, 2, 5]
+      range_km: [5, 10, 15, 20]
+    medical:
+      typical_payload_kg: [0.5, 1, 2]
+      range_km: [10, 20, 30]
+      
+  surveying:
+    photogrammetry:
+      typical_payload_kg: [0.5, 1, 2]
+      flight_time_min: [30, 45, 60]
+    lidar:
+      typical_payload_kg: [1, 2, 3, 5]
+      flight_time_min: [20, 30, 45]
+      
+  cinematography:
+    typical_payload_kg: [0.5, 1, 2, 3]
+    flight_time_min: [20, 30, 45]
+    
+  search_rescue:
+    typical_payload_kg: [0.5, 1, 2]
+    flight_time_min: [30, 45, 60]
+    
+  fpv_racing:
+    typical_payload_kg: [0, 0.1, 0.2]
+    flight_time_min: [3, 5, 7]
+    
+  research:
+    typical_payload_kg: [0.5, 1, 2, 5, 10]
+    flight_time_min: [15, 30, 45, 60]
+    
+  security:
+    typical_payload_kg: [0.5, 1, 2]
+    flight_time_min: [30, 45, 60, 90]
+
+# =============================================================================
+# REGULATORY JURISDICTIONS
+# =============================================================================
+regulations:
+  supported_jurisdictions:
+    - india_dgca
+    - usa_faa
+    - eu_easa
+    - uk_caa
+    - china_caac
+    - australia_casa
+    - canada_tc
+    - japan_mlit
+    - uae_gcaa
+    - singapore_caas
+    
+  default_jurisdiction: "india_dgca"
+
+# =============================================================================
+# CAD GENERATION
+# =============================================================================
+cad:
+  # Detail levels
+  levels:
+    basic:
+      description: "Simple frame geometry, mounting points only"
+      output_formats: ["stl", "step"]
+      
+    detailed:
+      description: "Full frame with brackets, motor mounts, landing gear"
+      output_formats: ["stl", "step", "iges", "dxf"]
+      
+  # Default parameters
+  defaults:
+    wall_thickness_mm: 2.0
+    tolerance_mm: 0.2
+    fillet_radius_mm: 1.0
+    
+  # 3D printing settings
+  printing:
+    layer_height_mm: 0.2
+    infill_percent: 20
+    material: "PLA"  # PLA, PETG, ABS, Nylon, CF-Nylon
+
+# =============================================================================
+# SIMULATION
+# =============================================================================
+simulation:
+  # Standalone Python simulation
+  standalone:
+    enabled: true
+    timestep_s: 0.001
+    max_duration_s: 300
+    
+  # MATLAB/Simulink interface
+  matlab:
+    enabled: false  # Set to true if MATLAB is installed
+    install_path: ""  # Auto-detect or specify path
+
+# =============================================================================
+# OUTPUT SETTINGS
+# =============================================================================
+output:
+  base_directory: "./output"
+  
+  # Documentation formats
+  documentation:
+    formats: ["pdf", "html", "md"]
+    include_calculations: true
+    include_justifications: true
+    
+  # BOM settings
+  bom:
+    include_links: true
+    currency: "INR"
+    
+  # Wiring diagram settings
+  wiring:
+    format: "svg"
+    include_wire_lengths: true
+    include_connector_types: true
+
+# =============================================================================
+# OPTIMIZATION SETTINGS
+# =============================================================================
+optimization:
+  # Objectives to optimize
+  objectives:
+    - weight
+    - cost
+    - endurance
+    - performance
+    
+  # Optimization algorithm
+  algorithm: "NSGA-II"  # NSGA-II, NSGA-III, MOEAD
+  
+  # Population size for genetic algorithm
+  population_size: 100
+  
+  # Number of generations
+  n_generations: 50
+  
+  # Convergence tolerance
+  tolerance: 1e-4
+
+# =============================================================================
+# VALIDATION SETTINGS
+# =============================================================================
+validation:
+  # Physics validation
+  physics:
+    thrust_check: true
+    power_check: true
+    structural_check: true
+    cog_check: true
+    
+  # LLM-Judge settings
+  llm_judge:
+    enabled: true
+    strict_mode: false  # If true, reject any inconsistencies
+    
+  # Tolerance for numerical validation
+  tolerances:
+    thrust_percent: 5.0
+    power_percent: 5.0
+    weight_percent: 3.0
+    dimension_percent: 2.0
+
+# =============================================================================
+# DATABASE SETTINGS
+# =============================================================================
+database:
+  # Auto-update component databases
+  auto_update: false
+  update_interval_days: 30
+  
+  # Include discontinued products
+  include_discontinued: false
+  
+  # Price freshness (days)
+  price_validity_days: 7

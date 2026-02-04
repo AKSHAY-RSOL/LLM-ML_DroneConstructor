@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DroneForge AI - Drone Design Automation</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #1e3a5f 0%, #0d1b2a 100%);
+        }
+        .card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .progress-bar {
+            transition: width 0.3s ease;
+        }
+        .log-container {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .log-entry {
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+        }
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+    </style>
+</head>
+<body class="gradient-bg min-h-screen text-white">
+    <!-- Header -->
+    <header class="py-6 px-8 border-b border-gray-700">
+        <div class="container mx-auto flex items-center justify-between">
+            <div class="flex items-center space-x-4">
+                <i class="fas fa-drone text-4xl text-blue-400"></i>
+                <div>
+                    <h1 class="text-2xl font-bold">DroneForge AI</h1>
+                    <p class="text-gray-400 text-sm">LLM-Powered Drone Design Automation</p>
+                </div>
+            </div>
+            <nav class="flex space-x-6">
+                <a href="#design" class="hover:text-blue-400 transition">Design</a>
+                <a href="#jobs" class="hover:text-blue-400 transition">Jobs</a>
+                <a href="https://github.com" target="_blank" class="hover:text-blue-400 transition">
+                    <i class="fab fa-github"></i>
+                </a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-8 py-12">
+        <!-- Design Form Section -->
+        <section id="design" class="mb-16">
+            <h2 class="text-3xl font-bold mb-8">
+                <i class="fas fa-magic mr-3 text-blue-400"></i>
+                Create New Design
+            </h2>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- Input Form -->
+                <div class="card rounded-xl p-8">
+                    <form id="designForm">
+                        <!-- Mission Statement -->
+                        <div class="mb-6">
+                            <label class="block text-sm font-medium mb-2">
+                                <i class="fas fa-bullseye mr-2 text-blue-400"></i>
+                                Mission Statement
+                            </label>
+                            <textarea 
+                                id="mission" 
+                                rows="6" 
+                                class="w-full bg-gray-800 border border-gray-600 rounded-lg p-4 text-white focus:border-blue-400 focus:outline-none"
+                                placeholder="Describe your drone mission in detail...
+
+Example: I need a survey drone for agricultural mapping. It should carry a 500g multispectral camera, fly for at least 45 minutes, cover 100 hectares per flight, and operate in temperatures from 10°C to 40°C. Budget is around $3000."
+                            ></textarea>
+                        </div>
+                        
+                        <!-- LLM Provider -->
+                        <div class="grid grid-cols-2 gap-4 mb-6">
+                            <div>
+                                <label class="block text-sm font-medium mb-2">
+                                    <i class="fas fa-brain mr-2 text-blue-400"></i>
+                                    LLM Provider
+                                </label>
+                                <select id="provider" class="w-full bg-gray-800 border border-gray-600 rounded-lg p-3 text-white focus:border-blue-400 focus:outline-none">
+                                    <option value="ollama">Ollama (Local - Free)</option>
+                                    <option value="openai">OpenAI</option>
+                                    <option value="anthropic">Anthropic Claude</option>
+                                    <option value="google">Google Gemini</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-2">
+                                    <i class="fas fa-microchip mr-2 text-blue-400"></i>
+                                    Model
+                                </label>
+                                <input 
+                                    type="text" 
+                                    id="model" 
+                                    class="w-full bg-gray-800 border border-gray-600 rounded-lg p-3 text-white focus:border-blue-400 focus:outline-none"
+                                    placeholder="llama3"
+                                    value="llama3"
+                                >
+                            </div>
+                        </div>
+                        
+                        <!-- CAD Detail & Jurisdictions -->
+                        <div class="grid grid-cols-2 gap-4 mb-6">
+                            <div>
+                                <label class="block text-sm font-medium mb-2">
+                                    <i class="fas fa-cube mr-2 text-blue-400"></i>
+                                    CAD Detail Level
+                                </label>
+                                <select id="cadDetail" class="w-full bg-gray-800 border border-gray-600 rounded-lg p-3 text-white focus:border-blue-400 focus:outline-none">
+                                    <option value="basic">Basic</option>
+                                    <option value="detailed">Detailed</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-2">
+                                    <i class="fas fa-globe mr-2 text-blue-400"></i>
+                                    Regulatory Jurisdiction
+                                </label>
+                                <select id="jurisdiction" class="w-full bg-gray-800 border border-gray-600 rounded-lg p-3 text-white focus:border-blue-400 focus:outline-none">
+                                    <option value="india_dgca">India - DGCA</option>
+                                    <option value="usa_faa">USA - FAA</option>
+                                    <option value="eu_easa">EU - EASA</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <!-- Submit Button -->
+                        <button 
+                            type="submit" 
+                            id="submitBtn"
+                            class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-6 rounded-lg transition flex items-center justify-center"
+                        >
+                            <i class="fas fa-rocket mr-3"></i>
+                            Generate Drone Design
+                        </button>
+                    </form>
+                </div>
+                
+                <!-- Progress & Status -->
+                <div class="card rounded-xl p-8" id="statusPanel" style="display: none;">
+                    <h3 class="text-xl font-bold mb-6">
+                        <i class="fas fa-cogs mr-2 text-green-400 pulse"></i>
+                        Design in Progress
+                    </h3>
+                    
+                    <!-- Progress Bar -->
+                    <div class="mb-6">
+                        <div class="flex justify-between text-sm mb-2">
+                            <span id="currentAgent">Initializing...</span>
+                            <span id="progressPercent">0%</span>
+                        </div>
+                        <div class="w-full bg-gray-700 rounded-full h-4">
+                            <div id="progressBar" class="progress-bar bg-blue-500 h-4 rounded-full" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Agent Status -->
+                    <div class="grid grid-cols-3 gap-2 mb-6 text-xs" id="agentGrid">
+                        <div class="agent-status bg-gray-700 p-2 rounded" data-agent="mission_analyzer">🎯 Mission</div>
+                        <div class="agent-status bg-gray-700 p-2 rounded" data-agent="frame_topology">🔧 Topology</div>
+                        <div class="agent-status bg-gray-700 p-2 rounded" data-agent="propulsion">🚀 Propulsion</div>
+                        <div class="agent-status bg-gray-700 p-2 rounded" data-agent="aerodynamics">💨 Aero</div>
+                        <div class="agent-status bg-gray-700 p-2 rounded" data-agent="structural">🏗️ Structure</div>
+                        <div class="agent-status bg-gray-700 p-2 rounded" data-agent="power">🔋 Power</div>
+                        <div class="agent-status bg-gray-700 p-2 rounded" data-agent="electronics">⚡ Electronics</div>
+                        <div class="agent-status bg-gray-700 p-2 rounded" data-agent="cog_analysis">⚖️ CoG</div>
+                        <div class="agent-status bg-gray-700 p-2 rounded" data-agent="autonomy">🤖 Autonomy</div>
+                        <div class="agent-status bg-gray-700 p-2 rounded" data-agent="software">💻 Software</div>
+                        <div class="agent-status bg-gray-700 p-2 rounded" data-agent="wiring">🔌 Wiring</div>
+                        <div class="agent-status bg-gray-700 p-2 rounded" data-agent="cad">📐 CAD</div>
+                        <div class="agent-status bg-gray-700 p-2 rounded" data-agent="regulatory">📋 Regulatory</div>
+                        <div class="agent-status bg-gray-700 p-2 rounded" data-agent="validator">✅ Validation</div>
+                        <div class="agent-status bg-gray-700 p-2 rounded" data-agent="optimizer">🎯 Optimize</div>
+                    </div>
+                    
+                    <!-- Logs -->
+                    <div class="log-container bg-gray-900 rounded-lg p-4">
+                        <div id="logOutput" class="space-y-1">
+                            <div class="log-entry text-gray-400">Waiting to start...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Results Section -->
+        <section id="results" class="mb-16" style="display: none;">
+            <h2 class="text-3xl font-bold mb-8">
+                <i class="fas fa-check-circle mr-3 text-green-400"></i>
+                Design Complete
+            </h2>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                <!-- Summary Cards -->
+                <div class="card rounded-xl p-6">
+                    <div class="text-4xl mb-4">🚁</div>
+                    <h3 class="font-bold text-lg mb-2">Drone Type</h3>
+                    <p id="resultType" class="text-gray-400">-</p>
+                </div>
+                <div class="card rounded-xl p-6">
+                    <div class="text-4xl mb-4">⏱️</div>
+                    <h3 class="font-bold text-lg mb-2">Flight Time</h3>
+                    <p id="resultFlightTime" class="text-gray-400">-</p>
+                </div>
+                <div class="card rounded-xl p-6">
+                    <div class="text-4xl mb-4">💰</div>
+                    <h3 class="font-bold text-lg mb-2">Estimated Cost</h3>
+                    <p id="resultCost" class="text-gray-400">-</p>
+                </div>
+            </div>
+            
+            <!-- Download Buttons -->
+            <div class="flex space-x-4 mb-8">
+                <a id="downloadGuide" href="#" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg transition flex items-center">
+                    <i class="fas fa-file-alt mr-2"></i>
+                    Download Build Guide
+                </a>
+                <a id="downloadBom" href="#" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition flex items-center">
+                    <i class="fas fa-list mr-2"></i>
+                    Download BOM
+                </a>
+                <a id="downloadState" href="#" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-lg transition flex items-center">
+                    <i class="fas fa-database mr-2"></i>
+                    Download Full Data
+                </a>
+            </div>
+            
+            <!-- Build Guide Preview -->
+            <div class="card rounded-xl p-8">
+                <h3 class="font-bold text-xl mb-4">
+                    <i class="fas fa-book mr-2 text-blue-400"></i>
+                    Build Guide Preview
+                </h3>
+                <div id="buildGuidePreview" class="prose prose-invert max-w-none bg-gray-900 rounded-lg p-6 overflow-auto max-h-96">
+                    <p class="text-gray-400">Loading...</p>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Recent Jobs Section -->
+        <section id="jobs">
+            <h2 class="text-3xl font-bold mb-8">
+                <i class="fas fa-history mr-3 text-purple-400"></i>
+                Recent Jobs
+            </h2>
+            
+            <div class="card rounded-xl overflow-hidden">
+                <table class="w-full">
+                    <thead class="bg-gray-800">
+                        <tr>
+                            <th class="text-left p-4">Job ID</th>
+                            <th class="text-left p-4">Status</th>
+                            <th class="text-left p-4">Created</th>
+                            <th class="text-left p-4">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="jobsTable">
+                        <tr>
+                            <td colspan="4" class="p-4 text-center text-gray-400">No jobs yet</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="py-6 px-8 border-t border-gray-700 mt-16">
+        <div class="container mx-auto text-center text-gray-400">
+            <p>DroneForge AI - LLM-based Multi-Agent Drone Design Automation</p>
+            <p class="text-sm mt-2">Built with LangGraph, LangChain, and Flask</p>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script>
+        let currentJobId = null;
+        let eventSource = null;
+        
+        // Form submission
+        document.getElementById('designForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const mission = document.getElementById('mission').value.trim();
+            if (!mission) {
+                alert('Please enter a mission statement');
+                return;
+            }
+            
+            const data = {
+                mission: mission,
+                provider: document.getElementById('provider').value,
+                model: document.getElementById('model').value,
+                cad_detail: document.getElementById('cadDetail').value,
+                jurisdictions: [document.getElementById('jurisdiction').value]
+            };
+            
+            // Disable form
+            document.getElementById('submitBtn').disabled = true;
+            document.getElementById('submitBtn').innerHTML = '<i class="fas fa-spinner fa-spin mr-3"></i>Starting...';
+            
+            try {
+                const response = await fetch('/api/design', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    currentJobId = result.job_id;
+                    showStatusPanel();
+                    startEventStream(currentJobId);
+                    loadJobs();
+                } else {
+                    alert('Error: ' + result.error);
+                }
+            } catch (err) {
+                alert('Error: ' + err.message);
+            }
+            
+            // Re-enable form
+            document.getElementById('submitBtn').disabled = false;
+            document.getElementById('submitBtn').innerHTML = '<i class="fas fa-rocket mr-3"></i>Generate Drone Design';
+        });
+        
+        function showStatusPanel() {
+            document.getElementById('statusPanel').style.display = 'block';
+            document.getElementById('results').style.display = 'none';
+            
+            // Reset agent grid
+            document.querySelectorAll('.agent-status').forEach(el => {
+                el.classList.remove('bg-green-600', 'bg-blue-600');
+                el.classList.add('bg-gray-700');
+            });
+            
+            // Reset progress
+            document.getElementById('progressBar').style.width = '0%';
+            document.getElementById('progressPercent').textContent = '0%';
+            document.getElementById('currentAgent').textContent = 'Initializing...';
+            document.getElementById('logOutput').innerHTML = '<div class="log-entry text-gray-400">Starting design job...</div>';
+        }
+        
+        function startEventStream(jobId) {
+            if (eventSource) {
+                eventSource.close();
+            }
+            
+            eventSource = new EventSource(`/api/design/${jobId}/stream`);
+            
+            eventSource.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                
+                if (data.log) {
+                    addLog(data.log);
+                }
+                
+                if (data.progress !== undefined) {
+                    updateProgress(data.progress);
+                }
+                
+                if (data.agent) {
+                    highlightAgent(data.agent);
+                }
+                
+                if (data.status === 'completed') {
+                    eventSource.close();
+                    showResults(jobId);
+                } else if (data.status === 'failed') {
+                    eventSource.close();
+                    addLog('❌ Design failed!');
+                }
+            };
+            
+            eventSource.onerror = () => {
+                // Poll for status as fallback
+                pollStatus(jobId);
+            };
+        }
+        
+        async function pollStatus(jobId) {
+            const response = await fetch(`/api/design/${jobId}`);
+            const data = await response.json();
+            
+            updateProgress(data.progress);
+            if (data.current_agent) {
+                highlightAgent(data.current_agent);
+            }
+            
+            if (data.status === 'completed') {
+                showResults(jobId);
+            } else if (data.status === 'running' || data.status === 'pending') {
+                setTimeout(() => pollStatus(jobId), 2000);
+            }
+        }
+        
+        function addLog(message) {
+            const logOutput = document.getElementById('logOutput');
+            const entry = document.createElement('div');
+            entry.className = 'log-entry text-gray-300';
+            entry.textContent = message;
+            logOutput.appendChild(entry);
+            logOutput.scrollTop = logOutput.scrollHeight;
+        }
+        
+        function updateProgress(percent) {
+            document.getElementById('progressBar').style.width = `${percent}%`;
+            document.getElementById('progressPercent').textContent = `${percent}%`;
+        }
+        
+        function highlightAgent(agentName) {
+            document.getElementById('currentAgent').textContent = agentName.replace('_', ' ').toUpperCase();
+            
+            document.querySelectorAll('.agent-status').forEach(el => {
+                const agent = el.dataset.agent;
+                if (agent === agentName) {
+                    el.classList.remove('bg-gray-700', 'bg-green-600');
+                    el.classList.add('bg-blue-600');
+                } else if (el.classList.contains('bg-blue-600')) {
+                    el.classList.remove('bg-blue-600');
+                    el.classList.add('bg-green-600');
+                }
+            });
+        }
+        
+        async function showResults(jobId) {
+            document.getElementById('results').style.display = 'block';
+            
+            try {
+                const response = await fetch(`/api/design/${jobId}/result`);
+                const data = await response.json();
+                
+                // Update summary cards
+                if (data.design_state) {
+                    const state = data.design_state;
+                    const missionReq = state.mission_requirements || {};
+                    const power = state.power_design || {};
+                    const bom = data.bom || {};
+                    
+                    document.getElementById('resultType').textContent = 
+                        `${missionReq.drone_type || 'Multirotor'} - ${missionReq.configuration || 'Quadcopter'}`;
+                    document.getElementById('resultFlightTime').textContent = 
+                        `${(power.usable_flight_time_min || 0).toFixed(1)} minutes`;
+                    document.getElementById('resultCost').textContent = 
+                        `$${(bom.total_cost || 0).toFixed(2)}`;
+                }
+                
+                // Set download links
+                document.getElementById('downloadGuide').href = `/api/design/${jobId}/download/guide`;
+                document.getElementById('downloadBom').href = `/api/design/${jobId}/download/bom`;
+                document.getElementById('downloadState').href = `/api/design/${jobId}/download/state`;
+                
+                // Render build guide preview
+                if (data.build_guide) {
+                    document.getElementById('buildGuidePreview').innerHTML = marked.parse(data.build_guide);
+                }
+            } catch (err) {
+                console.error('Error loading results:', err);
+            }
+            
+            loadJobs();
+        }
+        
+        async function loadJobs() {
+            try {
+                const response = await fetch('/api/jobs');
+                const jobs = await response.json();
+                
+                const tbody = document.getElementById('jobsTable');
+                
+                if (jobs.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="4" class="p-4 text-center text-gray-400">No jobs yet</td></tr>';
+                    return;
+                }
+                
+                tbody.innerHTML = jobs.map(job => `
+                    <tr class="border-t border-gray-700">
+                        <td class="p-4 font-mono">${job.id}</td>
+                        <td class="p-4">
+                            <span class="px-2 py-1 rounded text-sm ${
+                                job.status === 'completed' ? 'bg-green-600' :
+                                job.status === 'running' ? 'bg-blue-600' :
+                                job.status === 'failed' ? 'bg-red-600' :
+                                'bg-gray-600'
+                            }">
+                                ${job.status}
+                            </span>
+                        </td>
+                        <td class="p-4 text-gray-400">${new Date(job.created_at).toLocaleString()}</td>
+                        <td class="p-4">
+                            ${job.status === 'completed' ? `
+                                <button onclick="showResults('${job.id}')" class="text-blue-400 hover:text-blue-300 mr-4">
+                                    <i class="fas fa-eye"></i> View
+                                </button>
+                            ` : ''}
+                        </td>
+                    </tr>
+                `).join('');
+            } catch (err) {
+                console.error('Error loading jobs:', err);
+            }
+        }
+        
+        // Provider change handler
+        document.getElementById('provider').addEventListener('change', (e) => {
+            const modelInput = document.getElementById('model');
+            const defaultModels = {
+                'ollama': 'llama3',
+                'openai': 'gpt-4',
+                'anthropic': 'claude-3-sonnet-20240229',
+                'google': 'gemini-pro'
+            };
+            modelInput.value = defaultModels[e.target.value] || '';
+        });
+        
+        // Load jobs on page load
+        loadJobs();
+    </script>
+</body>
+</html>

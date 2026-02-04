@@ -1,0 +1,8 @@
+{
+    "mission": "I need a quadcopter drone for real estate photography and videography. It should carry a gimbal-stabilized camera weighing about 300g, fly for at least 25 minutes, have a range of 2km, and be easy to transport. I want smooth cinematic footage capability, good low-light performance support, and GPS features like orbit mode and follow-me. Operating primarily in urban/suburban areas in the USA. Budget around $1500.",
+    "provider": "ollama",
+    "model": "llama3",
+    "cad_detail": "detailed",
+    "jurisdictions": ["usa_faa"],
+    "output_dir": "./output/photography_drone"
+}

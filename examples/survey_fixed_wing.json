@@ -1,0 +1,8 @@
+{
+    "mission": "Design a fixed-wing survey drone for topographic mapping and land surveying. The drone should carry a 400g multispectral camera, have at least 60 minutes of flight time, cover 200+ hectares per flight, and cruise at 15-20 m/s. It needs to be hand-launchable and have a safe belly-landing capability. Autonomous flight with pre-programmed survey patterns is essential. Must work in European airspace compliant with EASA regulations. Budget is €4000.",
+    "provider": "ollama",
+    "model": "llama3",
+    "cad_detail": "detailed",
+    "jurisdictions": ["eu_easa"],
+    "output_dir": "./output/survey_fixed_wing"
+}

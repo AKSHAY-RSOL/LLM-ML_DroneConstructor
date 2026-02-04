@@ -1,0 +1,297 @@
+{
+  "metadata": {
+    "version": "1.0.0",
+    "last_updated": "2026-01-15",
+    "description": "Comprehensive flight controller database",
+    "units": {
+      "weight": "g",
+      "dimensions": "mm",
+      "price": "USD"
+    }
+  },
+  "flight_controllers": [
+    {
+      "id": "pixhawk6x",
+      "brand": "Holybro",
+      "model": "Pixhawk 6X",
+      "category": "professional",
+      "specs": {
+        "processor": "STM32H753IIK6",
+        "processor_speed_mhz": 480,
+        "coprocessor": "STM32F103",
+        "imu_redundancy": 3,
+        "imu_sensors": ["ICM-42688-P", "ICM-45686", "BMI088"],
+        "barometer": ["MS5611", "ICP-20100"],
+        "magnetometer": "IST8310",
+        "flash_mb": 2,
+        "ram_kb": 1024,
+        "weight_g": 60,
+        "dimensions_mm": [84.8, 44, 12.4],
+        "voltage_input_range": "4.9-5.5V",
+        "uart_ports": 8,
+        "can_ports": 2,
+        "i2c_ports": 4,
+        "spi_ports": 6,
+        "adc_channels": 6,
+        "pwm_outputs": 16,
+        "gpio_pins": 6
+      },
+      "firmware": ["ArduPilot", "PX4"],
+      "features": [
+        "Vibration isolation",
+        "Redundant power",
+        "Heated IMU",
+        "Industrial connector"
+      ],
+      "applications": ["commercial", "industrial", "research"],
+      "price_usd": 299,
+      "availability": "in_stock"
+    },
+    {
+      "id": "pixhawk6c",
+      "brand": "Holybro",
+      "model": "Pixhawk 6C",
+      "category": "professional",
+      "specs": {
+        "processor": "STM32H743IIK6",
+        "processor_speed_mhz": 480,
+        "imu_redundancy": 2,
+        "imu_sensors": ["ICM-42688-P", "BMI088"],
+        "barometer": "MS5611",
+        "magnetometer": "IST8310",
+        "flash_mb": 2,
+        "ram_kb": 512,
+        "weight_g": 35,
+        "dimensions_mm": [55.8, 45.4, 13.5],
+        "voltage_input_range": "4.9-5.5V",
+        "uart_ports": 6,
+        "can_ports": 2,
+        "i2c_ports": 3,
+        "pwm_outputs": 8,
+        "gpio_pins": 4
+      },
+      "firmware": ["ArduPilot", "PX4"],
+      "features": [
+        "Compact design",
+        "Vibration isolation"
+      ],
+      "applications": ["commercial", "photography", "mapping"],
+      "price_usd": 179,
+      "availability": "in_stock"
+    },
+    {
+      "id": "cubeorgange_plus",
+      "brand": "CubePilot",
+      "model": "Cube Orange+",
+      "category": "professional",
+      "specs": {
+        "processor": "STM32H757",
+        "processor_speed_mhz": 400,
+        "imu_redundancy": 3,
+        "imu_sensors": ["ICM-42688", "ICM-42688", "ICM-20948"],
+        "barometer": ["MS5611", "MS5611"],
+        "magnetometer": ["IST8310", "IST8310", "ICM-20948"],
+        "flash_mb": 2,
+        "ram_kb": 1024,
+        "weight_g": 76,
+        "dimensions_mm": [38.25, 38.25, 22],
+        "voltage_input_range": "4.1-5.7V",
+        "uart_ports": 5,
+        "can_ports": 2,
+        "i2c_ports": 2,
+        "pwm_outputs": 14,
+        "gpio_pins": 4
+      },
+      "firmware": ["ArduPilot", "PX4"],
+      "features": [
+        "Modular carrier board",
+        "Heated sensors",
+        "Industrial grade",
+        "Redundant everything"
+      ],
+      "applications": ["commercial", "industrial", "military"],
+      "price_usd": 385,
+      "availability": "in_stock"
+    },
+    {
+      "id": "matek_h743_slim",
+      "brand": "Matek",
+      "model": "H743-SLIM",
+      "category": "enthusiast",
+      "specs": {
+        "processor": "STM32H743VIT6",
+        "processor_speed_mhz": 480,
+        "imu_redundancy": 1,
+        "imu_sensors": ["ICM-42688-P"],
+        "barometer": "DPS310",
+        "magnetometer": "QMC5883L",
+        "flash_mb": 2,
+        "ram_kb": 1024,
+        "weight_g": 12,
+        "dimensions_mm": [46, 29, 8],
+        "voltage_input_range": "4.5-13V (onboard BEC)",
+        "uart_ports": 8,
+        "can_ports": 0,
+        "i2c_ports": 2,
+        "pwm_outputs": 13,
+        "gpio_pins": 2
+      },
+      "firmware": ["ArduPilot", "INAV", "Betaflight"],
+      "features": [
+        "Compact",
+        "Built-in BEC",
+        "OSD chip"
+      ],
+      "applications": ["hobby", "fpv", "long_range"],
+      "price_usd": 65,
+      "availability": "in_stock"
+    },
+    {
+      "id": "speedybee_f405_v4",
+      "brand": "SpeedyBee",
+      "model": "F405 V4",
+      "category": "fpv",
+      "specs": {
+        "processor": "STM32F405RGT6",
+        "processor_speed_mhz": 168,
+        "imu_redundancy": 1,
+        "imu_sensors": ["ICM-42688-P"],
+        "barometer": "DPS310",
+        "magnetometer": null,
+        "flash_mb": 16,
+        "ram_kb": 192,
+        "weight_g": 8,
+        "dimensions_mm": [36.5, 36.5, 6],
+        "voltage_input_range": "3S-6S",
+        "uart_ports": 6,
+        "can_ports": 0,
+        "i2c_ports": 1,
+        "pwm_outputs": 9
+      },
+      "firmware": ["Betaflight", "INAV"],
+      "features": [
+        "Blackbox logging",
+        "Bluetooth config",
+        "OSD chip"
+      ],
+      "applications": ["fpv_racing", "freestyle"],
+      "price_usd": 42,
+      "availability": "in_stock"
+    },
+    {
+      "id": "betaflight_f722",
+      "brand": "Generic",
+      "model": "F722-SE",
+      "category": "fpv",
+      "specs": {
+        "processor": "STM32F722RET6",
+        "processor_speed_mhz": 216,
+        "imu_redundancy": 1,
+        "imu_sensors": ["MPU6000"],
+        "barometer": null,
+        "magnetometer": null,
+        "flash_mb": 0.5,
+        "ram_kb": 256,
+        "weight_g": 6,
+        "dimensions_mm": [30.5, 30.5, 5],
+        "voltage_input_range": "3S-6S",
+        "uart_ports": 5,
+        "can_ports": 0,
+        "i2c_ports": 1,
+        "pwm_outputs": 8
+      },
+      "firmware": ["Betaflight"],
+      "features": [
+        "Standard mounting",
+        "OSD chip"
+      ],
+      "applications": ["fpv_racing"],
+      "price_usd": 28,
+      "availability": "in_stock"
+    },
+    {
+      "id": "kakute_h7_v2",
+      "brand": "Holybro",
+      "model": "Kakute H7 V2",
+      "category": "fpv_premium",
+      "specs": {
+        "processor": "STM32H743VIH6",
+        "processor_speed_mhz": 480,
+        "imu_redundancy": 1,
+        "imu_sensors": ["ICM-42688-P"],
+        "barometer": "BMP280",
+        "magnetometer": null,
+        "flash_mb": 16,
+        "ram_kb": 1024,
+        "weight_g": 9,
+        "dimensions_mm": [38.5, 26, 6],
+        "voltage_input_range": "3S-8S",
+        "uart_ports": 7,
+        "can_ports": 0,
+        "i2c_ports": 2,
+        "pwm_outputs": 9
+      },
+      "firmware": ["Betaflight", "INAV"],
+      "features": [
+        "Built-in OSD",
+        "Blackbox 128MB",
+        "Vibration damping"
+      ],
+      "applications": ["fpv_racing", "freestyle", "cinelifter"],
+      "price_usd": 58,
+      "availability": "in_stock"
+    },
+    {
+      "id": "radiomaster_nexus",
+      "brand": "RadioMaster",
+      "model": "Nexus F4",
+      "category": "budget",
+      "specs": {
+        "processor": "STM32F405RGT6",
+        "processor_speed_mhz": 168,
+        "imu_redundancy": 1,
+        "imu_sensors": ["BMI270"],
+        "barometer": null,
+        "magnetometer": null,
+        "flash_mb": 0,
+        "ram_kb": 192,
+        "weight_g": 6,
+        "dimensions_mm": [26.5, 26.5, 5],
+        "voltage_input_range": "2S-6S",
+        "uart_ports": 4,
+        "can_ports": 0,
+        "i2c_ports": 1,
+        "pwm_outputs": 8
+      },
+      "firmware": ["Betaflight"],
+      "features": [
+        "Ultra compact",
+        "Budget friendly"
+      ],
+      "applications": ["fpv_racing", "micro_drones"],
+      "price_usd": 22,
+      "availability": "in_stock"
+    }
+  ],
+  "selection_guidelines": {
+    "by_application": {
+      "commercial_industrial": ["pixhawk6x", "cubeorgange_plus", "pixhawk6c"],
+      "photography_mapping": ["pixhawk6c", "cubeorgange_plus", "matek_h743_slim"],
+      "fpv_racing": ["speedybee_f405_v4", "betaflight_f722", "kakute_h7_v2"],
+      "long_range": ["matek_h743_slim", "pixhawk6c"],
+      "research": ["pixhawk6x", "cubeorgange_plus"],
+      "hobby": ["matek_h743_slim", "speedybee_f405_v4"]
+    },
+    "by_firmware": {
+      "ArduPilot": "Best for autonomous missions, complex payloads",
+      "PX4": "Best for research, custom development",
+      "Betaflight": "Best for FPV racing, acrobatics",
+      "INAV": "Best for GPS navigation, long range"
+    },
+    "processor_tiers": {
+      "F4": "Entry level, sufficient for basic flights",
+      "F7": "Mid-range, better filtering, more UARTs",
+      "H7": "Top tier, fastest processing, most features"
+    }
+  }
+}

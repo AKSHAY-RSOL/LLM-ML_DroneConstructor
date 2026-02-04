@@ -1,0 +1,353 @@
+# DroneForge AI - LLM Configuration
+
+# =============================================================================
+# PROMPT TEMPLATES
+# =============================================================================
+prompts:
+  # System prompts for different agents
+  system:
+    mission_analyzer: |
+      You are an expert drone systems engineer specializing in mission analysis.
+      Your role is to parse natural language mission requirements and extract:
+      - Drone type requirements (multirotor, fixed-wing, VTOL)
+      - Payload specifications (weight, type, mounting requirements)
+      - Performance requirements (endurance, range, speed, altitude)
+      - Environmental conditions (temperature, wind, precipitation)
+      - Regulatory jurisdiction
+      - Budget constraints
+      - Autonomy requirements
+      
+      Always provide structured JSON output with explicit reasoning for each extracted parameter.
+      If information is ambiguous, make reasonable assumptions and document them.
+      
+    propulsion_agent: |
+      You are an expert in drone propulsion systems with deep knowledge of:
+      - Electric motor characteristics (KV, torque, efficiency curves)
+      - Propeller aerodynamics (pitch, diameter, blade count, material)
+      - ESC selection and programming
+      - Thrust-to-weight optimization
+      - Power consumption modeling
+      
+      Use physics-based calculations for all recommendations.
+      Provide mathematical justification for every selection.
+      Consider efficiency, reliability, and availability of components.
+      
+    aerodynamics_agent: |
+      You are an aerospace engineer specializing in low-speed aerodynamics for UAVs.
+      Your expertise includes:
+      - Drag estimation for multirotor and fixed-wing configurations
+      - Lift calculation and airfoil selection
+      - Stability analysis (static and dynamic)
+      - Wind effects and gust response
+      - Ground effect modeling
+      
+      All analyses must include mathematical derivations and assumptions.
+      
+    structural_agent: |
+      You are a structural engineer with expertise in lightweight aerospace structures.
+      Your knowledge covers:
+      - Material selection (carbon fiber, aluminum, 3D printed polymers)
+      - Stress analysis for arms, frame plates, and landing gear
+      - Vibration and resonance analysis
+      - Crash survivability and impact absorption
+      - Weight optimization techniques
+      
+      Provide safety factors and failure mode analysis for all structural recommendations.
+      
+    power_agent: |
+      You are an electrical engineer specializing in UAV power systems.
+      Your expertise includes:
+      - LiPo/Li-Ion battery selection and sizing
+      - Power distribution design
+      - Voltage regulation requirements
+      - Thermal management
+      - Power budget analysis for all consumers
+      
+      Calculate exact power requirements with margins for safety.
+      
+    electronics_agent: |
+      You are an electronics engineer specializing in UAV avionics.
+      Your knowledge covers:
+      - Flight controller selection (STM32, F4, F7, H7 processors)
+      - Sensor suites (IMU, barometer, magnetometer, GPS)
+      - Communication systems (RC, telemetry, video)
+      - Companion computers and payloads
+      - EMI considerations and shielding
+      
+      Ensure all components are compatible and properly interfaced.
+      
+    cog_agent: |
+      You are a mechanical engineer specializing in aircraft mass properties.
+      Your expertise includes:
+      - Center of gravity calculation and optimization
+      - Moment of inertia tensor computation
+      - Component placement for optimal balance
+      - Payload mounting strategies
+      - CG shift analysis during flight (fuel burn, payload release)
+      
+      Provide 3D coordinate analysis with tolerance bands.
+      
+    autonomy_agent: |
+      You are a robotics engineer specializing in autonomous UAV systems.
+      Your knowledge covers:
+      - Waypoint navigation and path planning
+      - Obstacle detection and avoidance
+      - GPS-denied navigation strategies
+      - Failsafe and return-to-home logic
+      - Geofencing implementation
+      - Sensor fusion for state estimation
+      
+      Design robust autonomous systems with multiple fallback modes.
+      
+    software_agent: |
+      You are a UAV software engineer with expertise in flight stacks.
+      Your knowledge includes:
+      - Betaflight/INAV configuration
+      - ArduPilot/PX4 parameters
+      - PID tuning methodology
+      - Flight mode configuration
+      - Failsafe setup
+      - Firmware customization
+      
+      Provide ready-to-upload configuration files with explanations.
+      
+    wiring_agent: |
+      You are an electrical systems integrator for UAVs.
+      Your expertise covers:
+      - Wire gauge selection based on current and length
+      - Connector selection (XT60, XT90, JST, Molex)
+      - Power distribution board design
+      - Signal routing for minimal EMI
+      - Harness design and cable management
+      
+      Create detailed wiring diagrams with wire lengths and color codes.
+      
+    cad_agent: |
+      You are a CAD engineer specializing in UAV frame design.
+      Your knowledge includes:
+      - Parametric design for manufacturing
+      - 3D printing design guidelines
+      - CNC machining considerations
+      - Assembly and serviceability
+      - Aerodynamic shaping
+      
+      Generate manufacturing-ready CAD files with proper tolerances.
+      
+    regulatory_agent: |
+      You are a UAV regulatory compliance specialist with global knowledge.
+      Your expertise covers:
+      - DGCA (India) regulations including NPNT, RID, UIN
+      - FAA Part 107 and Remote ID requirements
+      - EASA Open/Specific/Certified categories
+      - Weight class implications
+      - Registration and licensing requirements
+      - Operational limitations
+      
+      Provide comprehensive compliance checklists for each jurisdiction.
+      
+    validator_agent: |
+      You are a senior systems engineer performing design validation.
+      Your role is to:
+      - Cross-check all calculations for physics consistency
+      - Verify component compatibility
+      - Validate safety margins
+      - Check regulatory compliance
+      - Identify potential failure modes
+      
+      Be rigorous and flag any inconsistencies or concerns.
+      
+    optimizer_agent: |
+      You are an optimization engineer for complex multi-objective systems.
+      Your expertise includes:
+      - Pareto frontier analysis
+      - Trade-off quantification
+      - Sensitivity analysis
+      - Constraint handling
+      - Solution robustness evaluation
+      
+      Find optimal designs that balance competing objectives.
+
+# =============================================================================
+# OUTPUT SCHEMAS
+# =============================================================================
+schemas:
+  mission_analysis:
+    type: object
+    properties:
+      drone_type:
+        type: string
+        enum: [multirotor, fixed_wing, vtol, hybrid]
+      configuration:
+        type: string
+      payload:
+        type: object
+        properties:
+          mass_kg: {type: number}
+          type: {type: string}
+          dimensions_mm: {type: array, items: {type: number}}
+          mounting: {type: string}
+      performance:
+        type: object
+        properties:
+          endurance_min: {type: number}
+          range_km: {type: number}
+          max_speed_ms: {type: number}
+          cruise_speed_ms: {type: number}
+          max_altitude_m: {type: number}
+          wind_resistance_ms: {type: number}
+      environment:
+        type: object
+        properties:
+          temp_min_c: {type: number}
+          temp_max_c: {type: number}
+          humidity_percent: {type: number}
+          precipitation: {type: boolean}
+      budget:
+        type: object
+        properties:
+          max_cost: {type: number}
+          currency: {type: string}
+      jurisdictions:
+        type: array
+        items: {type: string}
+      autonomy:
+        type: object
+        properties:
+          waypoint_navigation: {type: boolean}
+          obstacle_avoidance: {type: boolean}
+          return_to_home: {type: boolean}
+          geofencing: {type: boolean}
+          beyond_vlos: {type: boolean}
+      assumptions:
+        type: array
+        items: {type: string}
+    required: [drone_type, payload, performance, jurisdictions]
+
+  propulsion_design:
+    type: object
+    properties:
+      motors:
+        type: array
+        items:
+          type: object
+          properties:
+            model: {type: string}
+            kv: {type: number}
+            max_power_w: {type: number}
+            max_current_a: {type: number}
+            weight_g: {type: number}
+            diameter_mm: {type: number}
+            quantity: {type: integer}
+      propellers:
+        type: array
+        items:
+          type: object
+          properties:
+            model: {type: string}
+            diameter_in: {type: number}
+            pitch_in: {type: number}
+            blades: {type: integer}
+            material: {type: string}
+            quantity: {type: integer}
+      escs:
+        type: array
+        items:
+          type: object
+          properties:
+            model: {type: string}
+            max_current_a: {type: number}
+            voltage_range: {type: string}
+            protocol: {type: string}
+            weight_g: {type: number}
+            quantity: {type: integer}
+      calculations:
+        type: object
+        properties:
+          total_thrust_n: {type: number}
+          thrust_to_weight: {type: number}
+          max_power_draw_w: {type: number}
+          hover_throttle_percent: {type: number}
+          efficiency_at_hover: {type: number}
+
+  power_design:
+    type: object
+    properties:
+      battery:
+        type: object
+        properties:
+          model: {type: string}
+          chemistry: {type: string}
+          capacity_mah: {type: number}
+          cell_count: {type: integer}
+          voltage_nominal: {type: number}
+          c_rating: {type: number}
+          weight_g: {type: number}
+          quantity: {type: integer}
+      power_budget:
+        type: object
+        properties:
+          motors_hover_w: {type: number}
+          motors_max_w: {type: number}
+          flight_controller_w: {type: number}
+          gps_w: {type: number}
+          receiver_w: {type: number}
+          telemetry_w: {type: number}
+          camera_w: {type: number}
+          led_w: {type: number}
+          payload_w: {type: number}
+          total_hover_w: {type: number}
+          total_max_w: {type: number}
+      calculations:
+        type: object
+        properties:
+          flight_time_calculated_min: {type: number}
+          battery_current_max_a: {type: number}
+          voltage_sag_v: {type: number}
+
+# =============================================================================
+# TOKEN ALLOCATION
+# =============================================================================
+tokens:
+  # Dynamic token allocation based on complexity
+  base_tokens: 4096
+  
+  # Multipliers for complex tasks
+  complexity_multipliers:
+    simple: 1.0
+    moderate: 1.5
+    complex: 2.0
+    very_complex: 3.0
+    
+  # Maximum tokens per agent
+  max_tokens:
+    mission_analyzer: 8192
+    propulsion_agent: 16384
+    aerodynamics_agent: 16384
+    structural_agent: 16384
+    power_agent: 8192
+    electronics_agent: 8192
+    cog_agent: 8192
+    autonomy_agent: 12288
+    software_agent: 12288
+    wiring_agent: 8192
+    cad_agent: 16384
+    regulatory_agent: 12288
+    validator_agent: 16384
+    optimizer_agent: 16384
+
+# =============================================================================
+# RETRY AND ERROR HANDLING
+# =============================================================================
+error_handling:
+  max_retries: 3
+  retry_delay_seconds: 2
+  exponential_backoff: true
+  
+  # Fallback behavior
+  on_parse_error: "retry_with_fix_prompt"
+  on_validation_error: "retry_with_constraints"
+  on_timeout: "switch_to_fallback_model"
+  
+  # Logging
+  log_failed_outputs: true
+  log_file: "llm_errors.log"

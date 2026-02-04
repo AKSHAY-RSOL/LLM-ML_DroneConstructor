@@ -1,0 +1,369 @@
+# USA FAA (Federal Aviation Administration) Drone Regulations
+# Updated: January 2026
+
+jurisdiction:
+  name: "United States of America"
+  authority: "Federal Aviation Administration (FAA)"
+  department: "Department of Transportation"
+  governing_rules: "14 CFR Part 107, Remote ID Rule"
+
+# =============================================================================
+# WEIGHT CATEGORIES
+# =============================================================================
+weight_categories:
+  recreational:
+    name: "Recreational (Section 44809)"
+    description: "Flying for fun/personal use"
+    max_weight_lbs: 55
+    max_weight_kg: 24.95
+    registration_required: true  # If over 0.55 lbs (250g)
+    remote_id_required: true
+    pilot_certificate_required: false
+    requirements:
+      - "Follow safety guidelines of community-based organization"
+      - "Fly only for recreational purposes"
+      - "Keep drone within visual line of sight"
+      - "Fly at or below 400 feet in uncontrolled airspace"
+      - "Get airspace authorization in controlled airspace"
+      - "Never fly near other aircraft"
+      - "Never fly over people or moving vehicles"
+      - "Never interfere with emergency operations"
+      
+  part_107:
+    name: "Part 107 Commercial"
+    description: "Commercial or business use"
+    max_weight_lbs: 55
+    max_weight_kg: 24.95
+    registration_required: true
+    remote_id_required: true
+    pilot_certificate_required: true
+    certificate_type: "Remote Pilot Certificate"
+    standard_restrictions:
+      max_altitude_agl_ft: 400
+      max_speed_mph: 100
+      max_speed_kts: 87
+      daylight_only: true  # Unless waiver obtained
+      vlos_required: true
+      over_people: false  # Unless waiver/Category 1-4
+      over_moving_vehicles: false
+      from_moving_vehicle: false
+      
+  above_55_lbs:
+    name: "Above 55 lbs"
+    description: "Requires special certification"
+    min_weight_lbs: 55
+    type_certificate_required: true
+    airworthiness_certificate_required: true
+    special_exemption_required: true
+
+# =============================================================================
+# REGISTRATION
+# =============================================================================
+registration:
+  threshold:
+    weight_lbs: 0.55
+    weight_g: 250
+    
+  recreational:
+    platform: "FAA DroneZone"
+    url: "https://faadronezone.faa.gov"
+    fee_usd: 5
+    validity_years: 3
+    marking: "Registration number visible on exterior"
+    
+  part_107:
+    platform: "FAA DroneZone"
+    url: "https://faadronezone.faa.gov"
+    fee_usd: 5
+    validity_years: 3
+    marking: "Registration number visible on exterior"
+
+# =============================================================================
+# REMOTE ID
+# =============================================================================
+remote_id:
+  effective_date: "2023-09-16"
+  compliance_required: true
+  
+  types:
+    standard:
+      name: "Standard Remote ID"
+      description: "Built-in Remote ID module"
+      broadcast_info:
+        - "Drone ID (serial number or session ID)"
+        - "Drone location (latitude, longitude, altitude)"
+        - "Drone velocity"
+        - "Control station location"
+        - "Time stamp"
+        - "Emergency status"
+      broadcast_method: "RF broadcast (Bluetooth 5.0 / WiFi NaN)"
+      
+    broadcast_module:
+      name: "Remote ID Broadcast Module"
+      description: "Add-on module for existing drones"
+      broadcast_info:
+        - "Drone ID"
+        - "Drone location"
+        - "Control station location"
+        - "Time stamp"
+      limitation: "Must fly within VLOS and within 400ft of pilot"
+      
+  fria:
+    name: "FAA-Recognized Identification Area"
+    description: "Designated areas where drones without Remote ID may operate"
+    requirements:
+      - "Must be fixed site"
+      - "Recognized by FAA"
+      - "Visual line of sight only"
+      - "Within designated boundaries"
+
+# =============================================================================
+# REMOTE PILOT CERTIFICATE
+# =============================================================================
+pilot_certification:
+  part_107:
+    name: "Remote Pilot Certificate"
+    minimum_age: 16
+    requirements:
+      - "Pass initial aeronautical knowledge test (Part 107)"
+      - "TSA security background check"
+      - "English language proficiency"
+    exam:
+      name: "Unmanned Aircraft General (UAG)"
+      questions: 60
+      passing_score_percent: 70
+      duration_hours: 2
+      topics:
+        - "Applicable regulations"
+        - "Airspace classification and operating requirements"
+        - "Aviation weather sources"
+        - "Effects of weather on sUAS performance"
+        - "Emergency procedures"
+        - "Aeronautical decision-making"
+        - "Crew resource management"
+        - "Radio communication procedures"
+        - "Airport operations"
+    recurrency:
+      method: "Online recurrent training OR knowledge test"
+      interval_months: 24
+      
+  training_sources:
+    - "FAA-approved testing centers (PSI, CATS)"
+    - "Online study courses"
+    - "FAA Part 107 Study Guide"
+
+# =============================================================================
+# AIRSPACE
+# =============================================================================
+airspace:
+  controlled:
+    class_b:
+      description: "Busiest airports"
+      authorization_required: true
+      max_altitude_agl_ft: "Varies - see sectional chart"
+      authorization_method: "LAANC or DroneZone"
+      
+    class_c:
+      description: "Medium-size airports"
+      authorization_required: true
+      authorization_method: "LAANC or DroneZone"
+      
+    class_d:
+      description: "Smaller airports with control tower"
+      authorization_required: true
+      authorization_method: "LAANC or DroneZone"
+      
+    class_e:
+      description: "Controlled airspace not Class A, B, C, or D"
+      authorization_required: "At surface level only"
+      authorization_method: "LAANC or DroneZone"
+      
+  uncontrolled:
+    class_g:
+      description: "Uncontrolled airspace"
+      authorization_required: false
+      max_altitude_agl_ft: 400
+      
+  laanc:
+    name: "Low Altitude Authorization and Notification Capability"
+    description: "Automated airspace authorization system"
+    real_time: true
+    uas_facility_maps: true
+    providers:
+      - "AirMap"
+      - "Airspace Link"
+      - "Aloft"
+      - "DroneUp"
+      - "Kittyhawk"
+
+# =============================================================================
+# OPERATIONS OVER PEOPLE - CATEGORIES
+# =============================================================================
+operations_over_people:
+  category_1:
+    max_weight_lbs: 0.55
+    max_weight_g: 250
+    kinetic_energy_limit: false
+    exposed_rotating_parts: "No injury-causing parts"
+    remote_id: "Standard Remote ID or Broadcast Module"
+    operations_allowed:
+      - "Over people"
+      - "Over moving vehicles"
+      
+  category_2:
+    max_weight_lbs: 55
+    kinetic_energy_limit_ftlbs: 11
+    no_exposed_rotating_parts: true
+    declaration_of_compliance: true
+    remote_id: "Standard Remote ID"
+    operations_allowed:
+      - "Over people (not in covered structures/vehicles)"
+      - "Over moving vehicles (with consent or operations essential)"
+      
+  category_3:
+    max_weight_lbs: 55
+    kinetic_energy_limit_ftlbs: 25
+    no_exposed_rotating_parts: true
+    declaration_of_compliance: true
+    remote_id: "Standard Remote ID"
+    operations_allowed:
+      - "Over open-air assemblies only with notice"
+      - "Over closed/restricted sites"
+      - "Over moving vehicles (with consent)"
+      
+  category_4:
+    airworthiness_certificate: true
+    type_certificate: true
+    operating_limitations: "Per certification"
+    maintenance: "Per certification"
+
+# =============================================================================
+# WAIVERS
+# =============================================================================
+waivers:
+  waivable_rules:
+    - section: "107.25"
+      description: "Operation from a moving vehicle or aircraft"
+    - section: "107.29"
+      description: "Daylight operation (night operations)"
+    - section: "107.31"
+      description: "Visual line of sight aircraft operation"
+    - section: "107.33"
+      description: "Visual observer"
+    - section: "107.35"
+      description: "Operation of multiple small UAS"
+    - section: "107.37(a)"
+      description: "Yielding right of way"
+    - section: "107.39"
+      description: "Operation over people"
+    - section: "107.41"
+      description: "Operation in certain airspace"
+    - section: "107.51"
+      description: "Operating limitations"
+      
+  application:
+    platform: "FAA DroneZone"
+    processing_time_days: 90
+    approval_criteria:
+      - "Safety case"
+      - "Risk mitigation strategy"
+      - "Operational procedures"
+      - "Pilot qualifications"
+
+# =============================================================================
+# PROHIBITED OPERATIONS
+# =============================================================================
+prohibited:
+  - "Operating in a careless or reckless manner"
+  - "Flying under the influence of drugs or alcohol"
+  - "Interfering with manned aircraft operations"
+  - "Flying over people without authorization (Part 107)"
+  - "Flying in restricted or prohibited airspace"
+  - "Flying beyond visual line of sight without waiver"
+  - "Flying at night without proper lighting (Part 107)"
+  - "Dropping objects that create undue hazard"
+  - "Operating from a moving vehicle without waiver"
+  - "Flying in TFRs (Temporary Flight Restrictions)"
+  - "Flying over stadiums during events"
+  - "Flying near wildfires"
+  - "Flying near emergency response"
+
+# =============================================================================
+# SPECIAL LOCATIONS
+# =============================================================================
+special_locations:
+  national_parks:
+    agency: "National Park Service"
+    general_rule: "Prohibited in most national parks"
+    exceptions: "Specific permits for research/filming"
+    
+  military_installations:
+    general_rule: "Prohibited without authorization"
+    
+  washington_dc:
+    name: "Special Flight Rules Area (SFRA)"
+    description: "15-mile radius around Reagan National Airport"
+    recreational_drones: "Prohibited"
+    exceptions: "Very limited waivers"
+    
+  stadiums:
+    rule: "No operations within 3 nautical miles during events"
+    events: "MLB, NFL, NCAA, NASCAR, etc."
+
+# =============================================================================
+# PENALTIES
+# =============================================================================
+penalties:
+  civil:
+    per_violation_max_usd: 34777
+    
+  criminal:
+    unregistered_operation:
+      fine_usd: 250000
+      imprisonment_years: 3
+    dangerous_operation:
+      fine_usd: 250000
+      imprisonment_years: 3
+    interference_with_manned_aircraft:
+      fine_usd: 250000
+      imprisonment_years: 20
+
+# =============================================================================
+# BVLOS OPERATIONS
+# =============================================================================
+bvlos:
+  current_status: "Requires waiver or exemption"
+  
+  requirements:
+    - "Robust detect-and-avoid capability"
+    - "Reliable command and control links"
+    - "Contingency procedures"
+    - "Ground-based observers (in some cases)"
+    
+  emerging_rules:
+    name: "BVLOS ARC Recommendations"
+    status: "Under development"
+    expected_framework:
+      - "Risk-based approach"
+      - "Performance standards"
+      - "Airspace integration"
+
+# =============================================================================
+# DRONE DELIVERY
+# =============================================================================
+drone_delivery:
+  part_135:
+    name: "Air Carrier Certificate"
+    description: "For package delivery operations"
+    holders:
+      - "Wing (Alphabet)"
+      - "UPS Flight Forward"
+      - "Amazon Prime Air"
+      - "Zipline"
+      
+  requirements:
+    - "Part 135 Air Carrier Certificate"
+    - "Operations Manual"
+    - "Training Program"
+    - "Maintenance Program"
+    - "Safety Management System"

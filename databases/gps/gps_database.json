@@ -1,0 +1,115 @@
+{
+  "metadata": {
+    "version": "1.0.0",
+    "last_updated": "2026-01-15",
+    "description": "GPS and navigation modules database"
+  },
+  "gps_modules": [
+    {
+      "id": "holybro_m10",
+      "brand": "Holybro",
+      "model": "M10 GPS",
+      "specs": {
+        "chipset": "u-blox M10",
+        "constellations": ["GPS", "GLONASS", "Galileo", "BeiDou"],
+        "channels": 72,
+        "update_rate_hz": 25,
+        "accuracy_m": 1.5,
+        "magnetometer": "IST8310",
+        "weight_g": 32,
+        "dimensions_mm": [50, 50, 12],
+        "voltage_v": "3.3-5.0",
+        "interface": ["UART", "I2C"],
+        "antenna": "integrated_patch"
+      },
+      "features": ["SBAS", "QZSS", "Fast acquisition"],
+      "price_usd": 65,
+      "availability": "in_stock"
+    },
+    {
+      "id": "holybro_h_rtk_f9p",
+      "brand": "Holybro",
+      "model": "H-RTK F9P Rover",
+      "specs": {
+        "chipset": "u-blox ZED-F9P",
+        "constellations": ["GPS", "GLONASS", "Galileo", "BeiDou"],
+        "channels": 184,
+        "update_rate_hz": 20,
+        "accuracy_rtk_cm": 2.5,
+        "accuracy_standard_m": 1.0,
+        "magnetometer": "IST8310",
+        "weight_g": 58,
+        "dimensions_mm": [75, 75, 16],
+        "voltage_v": "5.0",
+        "interface": ["UART", "USB"],
+        "rtk_capable": true
+      },
+      "features": ["RTK", "Multi-band", "Moving baseline"],
+      "price_usd": 320,
+      "availability": "in_stock"
+    },
+    {
+      "id": "beitian_bn880",
+      "brand": "Beitian",
+      "model": "BN-880",
+      "specs": {
+        "chipset": "u-blox M8N",
+        "constellations": ["GPS", "GLONASS"],
+        "channels": 72,
+        "update_rate_hz": 10,
+        "accuracy_m": 2.5,
+        "magnetometer": "HMC5883L",
+        "weight_g": 22,
+        "dimensions_mm": [45, 45, 12],
+        "voltage_v": "3.0-5.0",
+        "interface": ["UART", "I2C"],
+        "antenna": "integrated_patch"
+      },
+      "features": ["Budget friendly", "Compact"],
+      "price_usd": 18,
+      "availability": "in_stock"
+    },
+    {
+      "id": "matek_m10q",
+      "brand": "Matek",
+      "model": "M10Q-5883",
+      "specs": {
+        "chipset": "u-blox M10",
+        "constellations": ["GPS", "GLONASS", "Galileo", "BeiDou"],
+        "channels": 72,
+        "update_rate_hz": 25,
+        "accuracy_m": 1.5,
+        "magnetometer": "QMC5883L",
+        "weight_g": 20,
+        "dimensions_mm": [42, 42, 10],
+        "voltage_v": "3.3-5.0",
+        "interface": ["UART", "I2C"],
+        "antenna": "integrated_patch"
+      },
+      "features": ["Compact", "Fast lock"],
+      "price_usd": 38,
+      "availability": "in_stock"
+    },
+    {
+      "id": "here3_plus",
+      "brand": "CubePilot",
+      "model": "Here3+",
+      "specs": {
+        "chipset": "u-blox M9N",
+        "constellations": ["GPS", "GLONASS", "Galileo", "BeiDou"],
+        "channels": 92,
+        "update_rate_hz": 25,
+        "accuracy_m": 0.8,
+        "magnetometer": "ICM20948",
+        "weight_g": 68,
+        "dimensions_mm": [76, 76, 16],
+        "voltage_v": "5.0",
+        "interface": ["CAN", "I2C"],
+        "antenna": "helical"
+      },
+      "features": ["CAN bus", "Professional grade", "Safety switch"],
+      "price_usd": 185,
+      "availability": "in_stock"
+    }
+  ]
+}

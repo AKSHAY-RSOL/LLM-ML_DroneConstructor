@@ -1,0 +1,285 @@
+{
+  "metadata": {
+    "version": "1.0.0",
+    "last_updated": "2026-01-15",
+    "description": "ESC (Electronic Speed Controller) database for drone applications",
+    "units": {
+      "current": "amps",
+      "weight": "grams",
+      "dimensions": "mm",
+      "price": "INR"
+    }
+  },
+  "escs": [
+    {
+      "id": "TMOTOR_F55A_PRO_II",
+      "manufacturer": "T-Motor",
+      "model": "F55A Pro II 4-in-1",
+      "type": "4-in-1",
+      "continuous_current_a": 55,
+      "burst_current_a": 65,
+      "burst_duration_s": 10,
+      "voltage_range_s": "3S-6S",
+      "weight_g": 35,
+      "dimensions_mm": {"l": 42, "w": 42, "h": 8},
+      "mounting_pattern_mm": 30.5,
+      "mcu": "G071",
+      "protocols": ["DShot150", "DShot300", "DShot600", "PWM", "OneShot125"],
+      "bec_output": false,
+      "current_sensor": true,
+      "telemetry": true,
+      "firmware": "BLHeli_32",
+      "application": ["fpv_racing", "freestyle", "cinematography"],
+      "features": ["Active braking", "LED support", "Bidirectional DShot"],
+      "price_inr": 7500,
+      "purchase_links": [
+        "https://store.tmotor.com/f55a-pro-ii"
+      ],
+      "availability": "in_stock"
+    },
+    {
+      "id": "HOBBYWING_XROTOR_60A",
+      "manufacturer": "Hobbywing",
+      "model": "XRotor 60A 4-in-1",
+      "type": "4-in-1",
+      "continuous_current_a": 60,
+      "burst_current_a": 80,
+      "burst_duration_s": 10,
+      "voltage_range_s": "3S-6S",
+      "weight_g": 42,
+      "dimensions_mm": {"l": 46, "w": 46, "h": 10},
+      "mounting_pattern_mm": 30.5,
+      "mcu": "STM32G071",
+      "protocols": ["DShot600", "PWM", "OneShot125", "MultiShot"],
+      "bec_output": true,
+      "bec_voltage_v": 5,
+      "bec_current_a": 2,
+      "current_sensor": true,
+      "telemetry": true,
+      "firmware": "BLHeli_32",
+      "application": ["fpv_racing", "freestyle"],
+      "price_inr": 8000,
+      "purchase_links": [
+        "https://www.hobbywing.com/xrotor-60a-4in1"
+      ],
+      "availability": "in_stock"
+    },
+    {
+      "id": "TMOTOR_FLAME_80A",
+      "manufacturer": "T-Motor",
+      "model": "Flame 80A HV",
+      "type": "single",
+      "continuous_current_a": 80,
+      "burst_current_a": 100,
+      "burst_duration_s": 10,
+      "voltage_range_s": "6S-14S",
+      "weight_g": 95,
+      "dimensions_mm": {"l": 65, "w": 33, "h": 15},
+      "mcu": "STM32F051",
+      "protocols": ["DShot600", "PWM", "OneShot125"],
+      "bec_output": true,
+      "bec_voltage_v": 5,
+      "bec_current_a": 3,
+      "current_sensor": false,
+      "telemetry": true,
+      "firmware": "BLHeli_32",
+      "application": ["cinematography", "heavy_lift", "agriculture_light"],
+      "price_inr": 5500,
+      "purchase_links": [
+        "https://store.tmotor.com/flame-80a-hv"
+      ],
+      "availability": "in_stock"
+    },
+    {
+      "id": "HOBBYWING_X8_FOC",
+      "manufacturer": "Hobbywing",
+      "model": "X8 FOC Integrated",
+      "type": "integrated_with_motor",
+      "continuous_current_a": 80,
+      "burst_current_a": 100,
+      "burst_duration_s": 10,
+      "voltage_range_s": "12S-14S",
+      "weight_g": 0,
+      "note": "Weight included in motor",
+      "mcu": "Custom FOC",
+      "protocols": ["CAN", "PWM"],
+      "bec_output": false,
+      "current_sensor": true,
+      "telemetry": true,
+      "foc": true,
+      "firmware": "Hobbywing Proprietary",
+      "application": ["agriculture", "heavy_lift", "industrial"],
+      "features": ["Integrated with motor", "FOC control", "CAN bus"],
+      "price_inr": 0,
+      "note_price": "Included with motor",
+      "availability": "in_stock"
+    },
+    {
+      "id": "TMOTOR_ALPHA_120A",
+      "manufacturer": "T-Motor",
+      "model": "Alpha 120A HV",
+      "type": "single",
+      "continuous_current_a": 120,
+      "burst_current_a": 180,
+      "burst_duration_s": 10,
+      "voltage_range_s": "6S-14S",
+      "weight_g": 145,
+      "dimensions_mm": {"l": 82, "w": 42, "h": 18},
+      "mcu": "Custom 32-bit",
+      "protocols": ["PWM", "DShot", "CAN"],
+      "bec_output": true,
+      "bec_voltage_v": 5,
+      "bec_current_a": 5,
+      "current_sensor": true,
+      "telemetry": true,
+      "firmware": "T-Motor Proprietary",
+      "application": ["heavy_lift", "agriculture", "cargo"],
+      "features": ["Active cooling", "Programmable"],
+      "price_inr": 12000,
+      "purchase_links": [
+        "https://store.tmotor.com/alpha-120a-hv"
+      ],
+      "availability": "in_stock"
+    },
+    {
+      "id": "FLYCOLOR_X_CROSS_60A",
+      "manufacturer": "Flycolor",
+      "model": "X-Cross 60A 4-in-1",
+      "type": "4-in-1",
+      "continuous_current_a": 60,
+      "burst_current_a": 70,
+      "burst_duration_s": 10,
+      "voltage_range_s": "3S-6S",
+      "weight_g": 38,
+      "dimensions_mm": {"l": 42, "w": 42, "h": 8},
+      "mounting_pattern_mm": 30.5,
+      "mcu": "G071",
+      "protocols": ["DShot1200", "DShot600", "DShot300", "PWM"],
+      "bec_output": false,
+      "current_sensor": true,
+      "telemetry": true,
+      "firmware": "BLHeli_32",
+      "application": ["fpv_racing", "freestyle"],
+      "price_inr": 5500,
+      "purchase_links": [
+        "https://www.flycolor.com/x-cross-60a"
+      ],
+      "availability": "in_stock"
+    },
+    {
+      "id": "APD_120F3",
+      "manufacturer": "APD",
+      "model": "120F3",
+      "type": "single",
+      "continuous_current_a": 120,
+      "burst_current_a": 150,
+      "burst_duration_s": 15,
+      "voltage_range_s": "6S-14S",
+      "weight_g": 85,
+      "dimensions_mm": {"l": 73, "w": 40, "h": 16},
+      "mcu": "Custom 32-bit FOC",
+      "protocols": ["PWM", "DShot", "Bidirectional DShot"],
+      "bec_output": true,
+      "bec_voltage_v": "5/8V selectable",
+      "bec_current_a": 4,
+      "current_sensor": true,
+      "telemetry": true,
+      "foc": true,
+      "firmware": "APD Proprietary",
+      "application": ["cinematography", "heavy_lift", "industrial"],
+      "features": ["FOC sinusoidal drive", "Ultra smooth", "Regenerative braking"],
+      "price_inr": 18000,
+      "purchase_links": [
+        "https://www.apdrc.com/120f3"
+      ],
+      "availability": "in_stock"
+    },
+    {
+      "id": "TMOTOR_U80_ESC",
+      "manufacturer": "T-Motor",
+      "model": "U80 ESC",
+      "type": "integrated",
+      "continuous_current_a": 80,
+      "burst_current_a": 120,
+      "burst_duration_s": 10,
+      "voltage_range_s": "12S-14S",
+      "weight_g": 0,
+      "note": "Integrated with U-series motors",
+      "mcu": "Custom FOC",
+      "protocols": ["PWM", "CAN", "S.Bus"],
+      "bec_output": false,
+      "current_sensor": true,
+      "telemetry": true,
+      "foc": true,
+      "firmware": "T-Motor Proprietary",
+      "application": ["heavy_lift", "agriculture", "cargo"],
+      "features": ["Integrated design", "FOC", "CAN bus telemetry"],
+      "price_inr": 0,
+      "note_price": "Included with motor",
+      "availability": "in_stock"
+    }
+  ],
+  "selection_guidelines": {
+    "current_sizing": {
+      "formula": "ESC_rating = Motor_max_current × 1.25",
+      "burst_margin": 1.5,
+      "notes": "Always size ESC with at least 25% headroom above motor max current"
+    },
+    "by_application": {
+      "fpv_racing": {
+        "type": "4-in-1",
+        "current_range_a": [35, 60],
+        "voltage": ["4S", "6S"],
+        "protocol": ["DShot600", "DShot1200"],
+        "recommended": ["TMOTOR_F55A_PRO_II", "HOBBYWING_XROTOR_60A"]
+      },
+      "cinematography": {
+        "type": ["4-in-1", "single"],
+        "current_range_a": [40, 80],
+        "voltage": ["4S", "6S"],
+        "protocol": ["PWM", "DShot600"],
+        "foc_preferred": true,
+        "recommended": ["TMOTOR_FLAME_80A", "APD_120F3"]
+      },
+      "agriculture": {
+        "type": ["single", "integrated"],
+        "current_range_a": [60, 150],
+        "voltage": ["12S", "14S"],
+        "protocol": ["PWM", "CAN"],
+        "foc_preferred": true,
+        "recommended": ["TMOTOR_ALPHA_120A", "HOBBYWING_X8_FOC"]
+      },
+      "heavy_lift": {
+        "type": ["single", "integrated"],
+        "current_range_a": [80, 200],
+        "voltage": ["12S", "14S"],
+        "protocol": ["PWM", "CAN"],
+        "recommended": ["TMOTOR_ALPHA_120A", "HOBBYWING_X8_FOC"]
+      }
+    },
+    "protocol_selection": {
+      "DShot600": {
+        "use_case": "FPV, racing, freestyle",
+        "latency": "Low",
+        "digital": true
+      },
+      "DShot300": {
+        "use_case": "General purpose",
+        "latency": "Low",
+        "digital": true
+      },
+      "PWM": {
+        "use_case": "Cinematography, commercial",
+        "latency": "Medium",
+        "digital": false,
+        "compatibility": "Universal"
+      },
+      "CAN": {
+        "use_case": "Industrial, heavy lift",
+        "latency": "Low",
+        "digital": true,
+        "advantages": ["Telemetry", "Daisy chain", "Noise immune"]
+      }
+    }
+  }
+}

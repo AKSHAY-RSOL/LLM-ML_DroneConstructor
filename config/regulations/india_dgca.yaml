@@ -1,0 +1,331 @@
+# India DGCA (Directorate General of Civil Aviation) Drone Regulations
+# Updated: January 2026
+
+jurisdiction:
+  name: "India"
+  authority: "Directorate General of Civil Aviation (DGCA)"
+  ministry: "Ministry of Civil Aviation"
+  governing_rules: "Drone Rules, 2021 (as amended)"
+  
+# =============================================================================
+# WEIGHT CATEGORIES
+# =============================================================================
+weight_categories:
+  nano:
+    name: "Nano"
+    max_weight_kg: 0.250
+    registration_required: false
+    uin_required: false
+    uaop_required: false
+    pilot_license_required: false
+    insurance_required: false
+    restrictions:
+      max_altitude_m: 50
+      max_speed_kmph: 25
+      fly_zones: ["green"]
+      time_restrictions: "Daylight only"
+      vlos_required: true
+      
+  micro:
+    name: "Micro"
+    min_weight_kg: 0.250
+    max_weight_kg: 2.0
+    registration_required: true
+    uin_required: true
+    uaop_required: false
+    pilot_license_required: false
+    insurance_required: true
+    restrictions:
+      max_altitude_m: 120
+      max_speed_kmph: 25
+      fly_zones: ["green", "yellow_with_permission"]
+      time_restrictions: "Daylight only"
+      vlos_required: true
+      
+  small:
+    name: "Small"
+    min_weight_kg: 2.0
+    max_weight_kg: 25.0
+    registration_required: true
+    uin_required: true
+    uaop_required: true
+    pilot_license_required: true
+    insurance_required: true
+    restrictions:
+      max_altitude_m: 120
+      max_speed_kmph: "As per type certificate"
+      fly_zones: ["green", "yellow_with_permission"]
+      time_restrictions: "Daylight only unless equipped for night"
+      vlos_required: true
+      
+  medium:
+    name: "Medium"
+    min_weight_kg: 25.0
+    max_weight_kg: 150.0
+    registration_required: true
+    uin_required: true
+    uaop_required: true
+    pilot_license_required: true
+    type_certificate_required: true
+    insurance_required: true
+    restrictions:
+      max_altitude_m: 120
+      fly_zones: ["green", "yellow_with_permission"]
+      time_restrictions: "As per UAOP"
+      vlos_required: false  # BVLOS possible with approval
+      
+  large:
+    name: "Large"
+    min_weight_kg: 150.0
+    registration_required: true
+    uin_required: true
+    uaop_required: true
+    pilot_license_required: true
+    type_certificate_required: true
+    insurance_required: true
+    restrictions:
+      max_altitude_m: "As per type certificate"
+      fly_zones: ["As per UAOP"]
+      time_restrictions: "As per UAOP"
+      vlos_required: false
+
+# =============================================================================
+# DIGITAL SKY PLATFORM REQUIREMENTS
+# =============================================================================
+digital_sky:
+  platform_url: "https://digitalsky.dgca.gov.in"
+  
+  requirements:
+    npnt:
+      name: "No Permission No Takeoff"
+      description: "Hardware/software module that ensures drone cannot arm without valid permission"
+      required_for: ["micro", "small", "medium", "large"]
+      features:
+        - "Real-time permission verification"
+        - "Geofencing enforcement"
+        - "Flight log recording"
+        - "Tamper-proof design"
+        
+    rid:
+      name: "Remote Identification"
+      description: "Real-time broadcast of drone identity and location"
+      required_for: ["micro", "small", "medium", "large"]
+      broadcast_parameters:
+        - "UIN (Unique Identification Number)"
+        - "Current location (lat, lon, alt)"
+        - "Pilot location"
+        - "Timestamp"
+        - "Emergency status"
+        
+    real_time_tracking:
+      name: "Real-time Tracking"
+      description: "Continuous position reporting to Digital Sky"
+      required_for: ["small", "medium", "large"]
+      update_interval_s: 1
+
+# =============================================================================
+# AIRSPACE ZONES
+# =============================================================================
+airspace_zones:
+  green:
+    name: "Green Zone"
+    description: "Unrestricted airspace up to 400ft/120m"
+    permission_required: false
+    restrictions:
+      - "Up to 400ft (120m) AGL"
+      - "Outside airport traffic zones"
+      - "Away from restricted areas"
+      
+  yellow:
+    name: "Yellow Zone"
+    description: "Controlled airspace requiring permission"
+    permission_required: true
+    permission_authority: "Concerned ATC/AAI"
+    typical_areas:
+      - "Within 8-12 km of airports"
+      - "Near heliports"
+      - "Temporary flight restriction areas"
+      
+  red:
+    name: "Red Zone"
+    description: "No-fly zone"
+    permission_required: true
+    permission_authority: "Central Government"
+    typical_areas:
+      - "Within 5 km of airports"
+      - "Military installations"
+      - "Strategic locations"
+      - "International borders"
+      - "Vijay Chowk to India Gate"
+      - "State Secretariats"
+
+# =============================================================================
+# REGISTRATION PROCESS
+# =============================================================================
+registration:
+  uin:
+    name: "Unique Identification Number"
+    format: "AA-BBBCCCCCC"
+    validity_years: 10
+    documents_required:
+      - "Drone specifications"
+      - "Manufacturer details"
+      - "Importer details (if imported)"
+      - "Owner identity proof"
+      - "Address proof"
+    fees:
+      nano: 0
+      micro: 100
+      small: 500
+      medium: 5000
+      large: 25000
+      
+  uaop:
+    name: "Unmanned Aircraft Operator Permit"
+    validity_years: 5
+    requirements:
+      - "Registered drone (UIN)"
+      - "Remote Pilot License (for applicable categories)"
+      - "Standard Operating Procedures"
+      - "Insurance"
+      - "Safety equipment"
+    fees_base_inr: 10000
+
+# =============================================================================
+# PILOT REQUIREMENTS
+# =============================================================================
+pilot_requirements:
+  remote_pilot_license:
+    required_for: ["small", "medium", "large"]
+    minimum_age: 18
+    maximum_age: 65
+    training_required: true
+    training_duration_hours: 25
+    practical_flying_hours: 10
+    exam_required: true
+    medical_certificate: true
+    validity_years: 10
+    
+  training_organizations:
+    name: "DGCA Approved Remote Pilot Training Organizations (RPTO)"
+    list_url: "https://digitalsky.dgca.gov.in/rpto"
+
+# =============================================================================
+# OPERATIONAL REQUIREMENTS
+# =============================================================================
+operations:
+  general:
+    daylight_only: true
+    maintain_vlos: true
+    max_altitude_agl_m: 120
+    min_distance_from_people_m: 50
+    min_distance_from_airports_km: 5
+    
+  insurance:
+    third_party_liability: true
+    minimum_coverage_inr:
+      micro: 500000
+      small: 1000000
+      medium: 5000000
+      large: 10000000
+      
+  maintenance:
+    pre_flight_check_required: true
+    log_book_required: true
+    periodic_inspection_required: true
+
+# =============================================================================
+# PROHIBITED ACTIVITIES
+# =============================================================================
+prohibited:
+  - "Flying over gatherings of people"
+  - "Carrying payload without permission"
+  - "Flying under influence of drugs/alcohol"
+  - "Flying near emergency response operations"
+  - "Flying in no-fly zones without permission"
+  - "Dropping objects from drone without permission"
+  - "Carriage of hazardous materials"
+  - "Flying above 400ft AGL without permission"
+
+# =============================================================================
+# PENALTIES
+# =============================================================================
+penalties:
+  minor_violations:
+    description: "Documentation issues, minor operational deviations"
+    fine_inr: "Up to 25,000"
+    
+  major_violations:
+    description: "Operating without registration, no-fly zone breach"
+    fine_inr: "25,000 to 100,000"
+    additional: "Seizure of drone"
+    
+  criminal_violations:
+    description: "Endangering life, property damage, security threats"
+    fine_inr: "Up to 500,000"
+    imprisonment: "Up to 2 years"
+
+# =============================================================================
+# IMPORT REGULATIONS
+# =============================================================================
+import:
+  dgft_license_required: true
+  wpc_approval_required: true
+  emi_emc_certification: true
+  bis_certification: "Recommended"
+  customs_clearance:
+    - "DGFT Import License"
+    - "WPC Equipment Type Approval"
+    - "Manufacturer's Certificate"
+    - "Airworthiness Certificate (if applicable)"
+
+# =============================================================================
+# SAFETY REQUIREMENTS
+# =============================================================================
+safety_features:
+  mandatory:
+    - "GPS with GLONASS/IRNSS"
+    - "Return-to-Home function"
+    - "Low battery warning"
+    - "Geofencing capability"
+    - "Flight data recording"
+    - "Anti-collision lights"
+    
+  recommended:
+    - "Obstacle avoidance sensors"
+    - "Redundant GPS"
+    - "Parachute system (for large drones)"
+    - "Motor redundancy"
+    - "Dual battery system"
+
+# =============================================================================
+# SPECIFIC USE CASE REQUIREMENTS
+# =============================================================================
+use_case_specific:
+  agriculture:
+    permissions:
+      - "Land owner consent"
+      - "State agriculture department coordination"
+    chemicals:
+      - "CIB&RC approved pesticides only"
+      - "Proper disposal of empty containers"
+    buffer_zones:
+      water_bodies_m: 100
+      residential_m: 50
+      
+  delivery:
+    permissions:
+      - "BVLOS approval"
+      - "Designated corridors"
+      - "Local body permission"
+    requirements:
+      - "Fail-safe package drop mechanism"
+      - "Real-time tracking"
+      - "Communication backup"
+      
+  surveying:
+    permissions:
+      - "Survey of India guidelines"
+      - "Local administration permission"
+    data:
+      - "Geospatial data handling as per government guidelines"

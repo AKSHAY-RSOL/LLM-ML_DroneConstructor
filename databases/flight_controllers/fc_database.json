@@ -1,0 +1,366 @@
+{
+  "metadata": {
+    "version": "1.0.0",
+    "last_updated": "2026-01-15",
+    "description": "Flight controller database for drone applications",
+    "units": {
+      "weight": "grams",
+      "dimensions": "mm",
+      "price": "INR"
+    }
+  },
+  "flight_controllers": [
+    {
+      "id": "SPEEDYBEE_F405_V4",
+      "manufacturer": "SpeedyBee",
+      "model": "F405 V4",
+      "processor": "STM32F405",
+      "clock_mhz": 168,
+      "gyro": "BMI270",
+      "gyro_sample_rate_khz": 8,
+      "barometer": "DPS310",
+      "osd": "AT7456E",
+      "blackbox": "16MB Flash",
+      "uart_count": 6,
+      "motor_outputs": 8,
+      "voltage_input_range_v": "3S-6S",
+      "current_sensor": true,
+      "current_sensor_scale": 800,
+      "bec_5v_a": 2.5,
+      "bec_9v_a": 2.0,
+      "led_strip_support": true,
+      "wifi_bluetooth": "Bluetooth",
+      "dimensions_mm": {"l": 40, "w": 40},
+      "mounting_pattern_mm": 30.5,
+      "weight_g": 10,
+      "firmware_support": ["Betaflight", "INAV"],
+      "application": ["fpv_racing", "freestyle", "cinematography"],
+      "price_inr": 4500,
+      "purchase_links": [
+        "https://www.speedybee.com/f405-v4"
+      ],
+      "availability": "in_stock"
+    },
+    {
+      "id": "MATEK_F405_SE",
+      "manufacturer": "Matek",
+      "model": "F405-SE",
+      "processor": "STM32F405",
+      "clock_mhz": 168,
+      "gyro": "ICM42688-P",
+      "gyro_sample_rate_khz": 8,
+      "barometer": "BMP280",
+      "osd": "AT7456E",
+      "blackbox": "8MB Flash",
+      "uart_count": 5,
+      "motor_outputs": 6,
+      "voltage_input_range_v": "3S-6S",
+      "current_sensor": true,
+      "current_sensor_scale": 179,
+      "bec_5v_a": 2.0,
+      "bec_9v_a": false,
+      "led_strip_support": true,
+      "wifi_bluetooth": false,
+      "dimensions_mm": {"l": 36, "w": 36},
+      "mounting_pattern_mm": 30.5,
+      "weight_g": 8,
+      "firmware_support": ["Betaflight", "INAV", "ArduPilot"],
+      "application": ["fpv_racing", "long_range", "wing"],
+      "price_inr": 3800,
+      "purchase_links": [
+        "https://www.mateksys.com/f405-se"
+      ],
+      "availability": "in_stock"
+    },
+    {
+      "id": "HOLYBRO_PIXHAWK_6C",
+      "manufacturer": "Holybro",
+      "model": "Pixhawk 6C",
+      "processor": "STM32H743",
+      "clock_mhz": 480,
+      "imu": ["ICM42688-P", "BMI055 (backup)"],
+      "barometer": ["MS5611", "BMP388"],
+      "magnetometer": "IST8310",
+      "osd": false,
+      "blackbox": "microSD",
+      "uart_count": 8,
+      "can_bus": 2,
+      "i2c_count": 4,
+      "spi_count": 6,
+      "motor_outputs": 16,
+      "voltage_input_range_v": "6S-12S (via power module)",
+      "current_sensor": "External Power Module",
+      "led_strip_support": true,
+      "safety_switch": true,
+      "buzzer": true,
+      "dimensions_mm": {"l": 84, "w": 44, "h": 12},
+      "mounting_pattern_mm": "Standard Pixhawk",
+      "weight_g": 45,
+      "firmware_support": ["PX4", "ArduPilot"],
+      "application": ["autonomous", "mapping", "inspection", "agriculture"],
+      "gps_included": false,
+      "price_inr": 18000,
+      "purchase_links": [
+        "https://holybro.com/products/pixhawk-6c"
+      ],
+      "availability": "in_stock"
+    },
+    {
+      "id": "HOLYBRO_PIXHAWK_6X",
+      "manufacturer": "Holybro",
+      "model": "Pixhawk 6X",
+      "processor": "STM32H753",
+      "clock_mhz": 480,
+      "imu": ["ICM42688-P x2", "ICM20649", "BMI055"],
+      "barometer": ["MS5611 x2"],
+      "magnetometer": "RM3100",
+      "osd": false,
+      "blackbox": "microSD",
+      "uart_count": 11,
+      "can_bus": 2,
+      "i2c_count": 5,
+      "spi_count": 6,
+      "motor_outputs": 16,
+      "voltage_input_range_v": "6S-14S (via power module)",
+      "current_sensor": "External Power Module",
+      "led_strip_support": true,
+      "safety_switch": true,
+      "buzzer": true,
+      "dimensions_mm": {"l": 96, "w": 44, "h": 15},
+      "mounting_pattern_mm": "Standard Pixhawk",
+      "weight_g": 58,
+      "firmware_support": ["PX4", "ArduPilot"],
+      "application": ["autonomous", "heavy_lift", "commercial", "agriculture"],
+      "triple_redundancy": true,
+      "price_inr": 42000,
+      "purchase_links": [
+        "https://holybro.com/products/pixhawk-6x"
+      ],
+      "availability": "in_stock"
+    },
+    {
+      "id": "CUAV_X7_PRO",
+      "manufacturer": "CUAV",
+      "model": "X7+ Pro",
+      "processor": "STM32H743",
+      "clock_mhz": 480,
+      "imu": ["ICM42688-P x3"],
+      "barometer": ["MS5611 x2"],
+      "magnetometer": "RM3100",
+      "osd": false,
+      "blackbox": "microSD (up to 256GB)",
+      "uart_count": 8,
+      "can_bus": 3,
+      "i2c_count": 4,
+      "spi_count": 4,
+      "motor_outputs": 16,
+      "voltage_input_range_v": "5V regulated",
+      "current_sensor": "External",
+      "led_strip_support": true,
+      "safety_switch": true,
+      "buzzer": true,
+      "dimensions_mm": {"l": 95, "w": 44, "h": 27},
+      "mounting_pattern_mm": "Standard Pixhawk",
+      "weight_g": 85,
+      "firmware_support": ["PX4", "ArduPilot"],
+      "application": ["commercial", "enterprise", "agriculture", "mapping"],
+      "industrial_grade": true,
+      "vibration_isolation": true,
+      "price_inr": 55000,
+      "purchase_links": [
+        "https://store.cuav.net/x7-pro"
+      ],
+      "availability": "in_stock"
+    },
+    {
+      "id": "BETAFLIGHT_F7_AIO",
+      "manufacturer": "Various",
+      "model": "F7 AIO 45A",
+      "processor": "STM32F722",
+      "clock_mhz": 216,
+      "gyro": "ICM42688-P",
+      "gyro_sample_rate_khz": 8,
+      "barometer": "BMP280",
+      "osd": "AT7456E",
+      "blackbox": "16MB Flash",
+      "uart_count": 5,
+      "motor_outputs": 4,
+      "esc_integrated": true,
+      "esc_current_a": 45,
+      "voltage_input_range_v": "3S-6S",
+      "current_sensor": true,
+      "bec_5v_a": 2.5,
+      "bec_9v_a": 2.0,
+      "led_strip_support": true,
+      "dimensions_mm": {"l": 38, "w": 38},
+      "mounting_pattern_mm": 30.5,
+      "weight_g": 28,
+      "firmware_support": ["Betaflight"],
+      "application": ["fpv_racing", "freestyle", "micro"],
+      "price_inr": 8500,
+      "purchase_links": [
+        "https://www.getfpv.com/f7-aio-45a"
+      ],
+      "availability": "in_stock"
+    },
+    {
+      "id": "MATEK_H743_WING",
+      "manufacturer": "Matek",
+      "model": "H743-WING V3",
+      "processor": "STM32H743",
+      "clock_mhz": 480,
+      "imu": "ICM42688-P",
+      "barometer": "DPS310",
+      "osd": "AT7456E",
+      "blackbox": "microSD + 2MB Flash",
+      "uart_count": 9,
+      "can_bus": 1,
+      "i2c_count": 2,
+      "motor_outputs": 13,
+      "servo_outputs": 13,
+      "voltage_input_range_v": "3S-8S",
+      "current_sensor": true,
+      "bec_5v_a": 3.0,
+      "bec_9v_a": 3.0,
+      "led_strip_support": true,
+      "dimensions_mm": {"l": 53, "w": 38},
+      "mounting_pattern_mm": "30.5 x 30.5",
+      "weight_g": 18,
+      "firmware_support": ["INAV", "ArduPilot"],
+      "application": ["fixed_wing", "vtol", "long_range"],
+      "price_inr": 7500,
+      "purchase_links": [
+        "https://www.mateksys.com/h743-wing-v3"
+      ],
+      "availability": "in_stock"
+    },
+    {
+      "id": "CUBE_ORANGE_PLUS",
+      "manufacturer": "CubePilot",
+      "model": "Cube Orange+",
+      "processor": "STM32H757",
+      "clock_mhz": 480,
+      "imu": ["ICM45686 x2", "ICM42688-P"],
+      "barometer": ["MS5611 x2", "ICP20100"],
+      "magnetometer": "External Required",
+      "osd": false,
+      "blackbox": "microSD",
+      "uart_count": 5,
+      "can_bus": 2,
+      "i2c_count": 3,
+      "motor_outputs": "Via Carrier Board",
+      "voltage_input_range_v": "Via Carrier Board",
+      "current_sensor": "External",
+      "safety_switch": true,
+      "buzzer": true,
+      "dimensions_mm": {"l": 38, "w": 38, "h": 22},
+      "mounting_pattern_mm": "Cube Standard",
+      "weight_g": 65,
+      "firmware_support": ["ArduPilot", "PX4"],
+      "application": ["commercial", "industrial", "enterprise"],
+      "modular_design": true,
+      "carrier_board_required": true,
+      "price_inr": 75000,
+      "purchase_links": [
+        "https://cubepilot.com/cube-orange-plus"
+      ],
+      "availability": "in_stock"
+    }
+  ],
+  "selection_guidelines": {
+    "by_application": {
+      "fpv_racing": {
+        "recommended": ["SPEEDYBEE_F405_V4", "BETAFLIGHT_F7_AIO"],
+        "requirements": {
+          "gyro_sample_rate_min_khz": 8,
+          "processor_min": "F405",
+          "size_max_mm": 40,
+          "firmware": "Betaflight"
+        }
+      },
+      "cinematography": {
+        "recommended": ["HOLYBRO_PIXHAWK_6C", "MATEK_H743_WING"],
+        "requirements": {
+          "barometer": true,
+          "gps_support": true,
+          "blackbox": true,
+          "firmware": ["ArduPilot", "PX4"]
+        }
+      },
+      "autonomous_mapping": {
+        "recommended": ["HOLYBRO_PIXHAWK_6X", "CUAV_X7_PRO", "CUBE_ORANGE_PLUS"],
+        "requirements": {
+          "redundant_imu": true,
+          "can_bus": true,
+          "uart_min": 6,
+          "firmware": ["ArduPilot", "PX4"]
+        }
+      },
+      "agriculture": {
+        "recommended": ["HOLYBRO_PIXHAWK_6X", "CUAV_X7_PRO", "CUBE_ORANGE_PLUS"],
+        "requirements": {
+          "industrial_grade": true,
+          "vibration_damping": true,
+          "redundant_sensors": true,
+          "high_motor_outputs": true
+        }
+      },
+      "fixed_wing": {
+        "recommended": ["MATEK_H743_WING", "HOLYBRO_PIXHAWK_6C"],
+        "requirements": {
+          "servo_outputs": true,
+          "airspeed_support": true,
+          "firmware": ["INAV", "ArduPilot"]
+        }
+      },
+      "vtol": {
+        "recommended": ["HOLYBRO_PIXHAWK_6X", "CUBE_ORANGE_PLUS"],
+        "requirements": {
+          "high_motor_outputs": true,
+          "vtol_support": true,
+          "firmware": ["ArduPilot", "PX4"]
+        }
+      }
+    },
+    "by_autonomy_level": {
+      "manual_only": {
+        "controllers": ["SPEEDYBEE_F405_V4", "BETAFLIGHT_F7_AIO"],
+        "notes": "Simple stabilization, no autonomous features"
+      },
+      "gps_assisted": {
+        "controllers": ["MATEK_F405_SE", "HOLYBRO_PIXHAWK_6C"],
+        "notes": "Position hold, return to home"
+      },
+      "fully_autonomous": {
+        "controllers": ["HOLYBRO_PIXHAWK_6X", "CUAV_X7_PRO", "CUBE_ORANGE_PLUS"],
+        "notes": "Waypoint missions, obstacle avoidance, complex missions"
+      }
+    }
+  },
+  "firmware_comparison": {
+    "betaflight": {
+      "focus": "FPV Racing and Freestyle",
+      "strengths": ["Low latency", "Precise control", "Excellent tuning"],
+      "weaknesses": ["Limited autonomous features", "No waypoints"],
+      "typical_use": ["Racing", "Freestyle", "Cinewhoop"]
+    },
+    "inav": {
+      "focus": "Navigation and Long Range",
+      "strengths": ["GPS navigation", "Return to home", "Fixed wing support"],
+      "weaknesses": ["Slightly higher latency than Betaflight"],
+      "typical_use": ["Long range", "Fixed wing", "Simple autonomous"]
+    },
+    "ardupilot": {
+      "focus": "Full Autonomous Operations",
+      "strengths": ["Complete autonomy", "All vehicle types", "Extensive features"],
+      "weaknesses": ["Complex setup", "Higher learning curve"],
+      "typical_use": ["Commercial", "Mapping", "Agriculture", "Research"]
+    },
+    "px4": {
+      "focus": "Professional Autonomous Systems",
+      "strengths": ["Industry standard", "QGroundControl", "ROS integration"],
+      "weaknesses": ["Complex", "Resource intensive"],
+      "typical_use": ["Enterprise", "Research", "Military"]
+    }
+  }
+}

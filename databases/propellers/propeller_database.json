@@ -1,0 +1,300 @@
+{
+  "metadata": {
+    "version": "1.0.0",
+    "last_updated": "2026-01-15",
+    "description": "Propeller database for drone applications",
+    "units": {
+      "diameter": "inches",
+      "pitch": "inches",
+      "weight": "grams",
+      "price": "INR"
+    }
+  },
+  "propellers": [
+    {
+      "id": "GEMFAN_5043_3",
+      "manufacturer": "Gemfan",
+      "model": "Hurricane 5043",
+      "diameter_in": 5.0,
+      "pitch_in": 4.3,
+      "blades": 3,
+      "weight_g": 4.2,
+      "material": "PC",
+      "hub_diameter_mm": 5,
+      "application": ["fpv_racing", "freestyle"],
+      "thrust_at_100_percent_g": 680,
+      "efficiency_g_per_w": 5.8,
+      "noise_db": 78,
+      "max_rpm": 32000,
+      "price_inr": 180,
+      "purchase_links": [
+        "https://www.getfpv.com/gemfan-hurricane-5043-3"
+      ],
+      "availability": "in_stock"
+    },
+    {
+      "id": "HQP_5X4X3",
+      "manufacturer": "HQProp",
+      "model": "DP 5x4x3",
+      "diameter_in": 5.0,
+      "pitch_in": 4.0,
+      "blades": 3,
+      "weight_g": 4.0,
+      "material": "PC",
+      "hub_diameter_mm": 5,
+      "application": ["fpv_racing", "freestyle"],
+      "thrust_at_100_percent_g": 650,
+      "efficiency_g_per_w": 5.9,
+      "noise_db": 76,
+      "max_rpm": 30000,
+      "price_inr": 200,
+      "purchase_links": [
+        "https://www.hqprop.com/dp-5x4x3"
+      ],
+      "availability": "in_stock"
+    },
+    {
+      "id": "TMOTOR_T9545_3",
+      "manufacturer": "T-Motor",
+      "model": "T9545",
+      "diameter_in": 9.0,
+      "pitch_in": 4.5,
+      "blades": 3,
+      "weight_g": 14,
+      "material": "Carbon Fiber",
+      "hub_diameter_mm": 6,
+      "application": ["cinematography", "long_range"],
+      "thrust_at_100_percent_g": 1400,
+      "efficiency_g_per_w": 8.2,
+      "noise_db": 72,
+      "max_rpm": 18000,
+      "price_inr": 1200,
+      "purchase_links": [
+        "https://store.tmotor.com/t9545"
+      ],
+      "availability": "in_stock"
+    },
+    {
+      "id": "APC_10X47",
+      "manufacturer": "APC",
+      "model": "10x4.7 SF",
+      "diameter_in": 10.0,
+      "pitch_in": 4.7,
+      "blades": 2,
+      "weight_g": 12,
+      "material": "Glass Fiber Nylon",
+      "hub_diameter_mm": 6,
+      "application": ["trainer", "mapping", "long_endurance"],
+      "thrust_at_100_percent_g": 1100,
+      "efficiency_g_per_w": 9.5,
+      "noise_db": 68,
+      "max_rpm": 15000,
+      "price_inr": 350,
+      "purchase_links": [
+        "https://www.apcprop.com/product/10x4-7sf"
+      ],
+      "availability": "in_stock"
+    },
+    {
+      "id": "TMOTOR_P15X5",
+      "manufacturer": "T-Motor",
+      "model": "Polymer 15x5",
+      "diameter_in": 15.0,
+      "pitch_in": 5.0,
+      "blades": 2,
+      "weight_g": 24,
+      "material": "Carbon Fiber Reinforced",
+      "hub_diameter_mm": 8,
+      "application": ["cinematography", "mapping", "inspection"],
+      "thrust_at_100_percent_g": 2800,
+      "efficiency_g_per_w": 9.8,
+      "noise_db": 65,
+      "max_rpm": 10000,
+      "price_inr": 2800,
+      "purchase_links": [
+        "https://store.tmotor.com/polymer-15x5"
+      ],
+      "availability": "in_stock"
+    },
+    {
+      "id": "TMOTOR_CF_17X6",
+      "manufacturer": "T-Motor",
+      "model": "Carbon 17x6",
+      "diameter_in": 17.0,
+      "pitch_in": 6.0,
+      "blades": 2,
+      "weight_g": 42,
+      "material": "Carbon Fiber",
+      "hub_diameter_mm": 10,
+      "application": ["heavy_lift", "agriculture_light"],
+      "thrust_at_100_percent_g": 4200,
+      "efficiency_g_per_w": 10.2,
+      "noise_db": 68,
+      "max_rpm": 8000,
+      "price_inr": 4500,
+      "purchase_links": [
+        "https://store.tmotor.com/cf-17x6"
+      ],
+      "availability": "in_stock"
+    },
+    {
+      "id": "TMOTOR_CF_28X92",
+      "manufacturer": "T-Motor",
+      "model": "Carbon 28x9.2",
+      "diameter_in": 28.0,
+      "pitch_in": 9.2,
+      "blades": 2,
+      "weight_g": 125,
+      "material": "Carbon Fiber",
+      "hub_diameter_mm": 12,
+      "application": ["heavy_lift", "agriculture"],
+      "thrust_at_100_percent_g": 12000,
+      "efficiency_g_per_w": 11.5,
+      "noise_db": 72,
+      "max_rpm": 5500,
+      "price_inr": 12000,
+      "purchase_links": [
+        "https://store.tmotor.com/cf-28x92"
+      ],
+      "availability": "in_stock"
+    },
+    {
+      "id": "HOBBYWING_3090",
+      "manufacturer": "Hobbywing",
+      "model": "3090 Foldable",
+      "diameter_in": 30.0,
+      "pitch_in": 9.0,
+      "blades": 2,
+      "weight_g": 145,
+      "material": "Carbon Fiber",
+      "hub_diameter_mm": 12,
+      "foldable": true,
+      "application": ["agriculture", "heavy_lift"],
+      "thrust_at_100_percent_g": 15000,
+      "efficiency_g_per_w": 11.8,
+      "noise_db": 74,
+      "max_rpm": 5000,
+      "price_inr": 15000,
+      "purchase_links": [
+        "https://www.hobbywing.com/3090-folding"
+      ],
+      "availability": "in_stock"
+    },
+    {
+      "id": "GEMFAN_7035_2",
+      "manufacturer": "Gemfan",
+      "model": "Flash 7035",
+      "diameter_in": 7.0,
+      "pitch_in": 3.5,
+      "blades": 2,
+      "weight_g": 8.5,
+      "material": "Glass Fiber Nylon",
+      "hub_diameter_mm": 5,
+      "application": ["long_range", "cinematography"],
+      "thrust_at_100_percent_g": 980,
+      "efficiency_g_per_w": 8.8,
+      "noise_db": 65,
+      "max_rpm": 20000,
+      "price_inr": 280,
+      "purchase_links": [
+        "https://www.getfpv.com/gemfan-flash-7035"
+      ],
+      "availability": "in_stock"
+    },
+    {
+      "id": "DJI_9450",
+      "manufacturer": "DJI",
+      "model": "9450 Self-tightening",
+      "diameter_in": 9.4,
+      "pitch_in": 5.0,
+      "blades": 2,
+      "weight_g": 13,
+      "material": "Plastic Composite",
+      "hub_diameter_mm": 8,
+      "self_tightening": true,
+      "application": ["prosumer", "cinematography"],
+      "thrust_at_100_percent_g": 1200,
+      "efficiency_g_per_w": 8.5,
+      "noise_db": 70,
+      "max_rpm": 12000,
+      "price_inr": 850,
+      "purchase_links": [
+        "https://store.dji.com/product/9450-self-tightening"
+      ],
+      "availability": "in_stock"
+    }
+  ],
+  "thrust_data": {
+    "description": "Detailed thrust curves for common motor+prop combinations",
+    "combinations": [
+      {
+        "motor": "EMAX_RS2205_2300",
+        "propeller": "GEMFAN_5043_3",
+        "battery_cells": 4,
+        "throttle_curve": {
+          "25": {"thrust_g": 180, "current_a": 2.5, "power_w": 37},
+          "50": {"thrust_g": 420, "current_a": 8.2, "power_w": 121},
+          "75": {"thrust_g": 650, "current_a": 17.5, "power_w": 259},
+          "100": {"thrust_g": 920, "current_a": 28, "power_w": 414}
+        }
+      },
+      {
+        "motor": "TMOTOR_U5_400",
+        "propeller": "TMOTOR_P15X5",
+        "battery_cells": 6,
+        "throttle_curve": {
+          "25": {"thrust_g": 650, "current_a": 2.8, "power_w": 62},
+          "50": {"thrust_g": 1400, "current_a": 8.5, "power_w": 189},
+          "75": {"thrust_g": 2100, "current_a": 16.2, "power_w": 360},
+          "100": {"thrust_g": 2800, "current_a": 24, "power_w": 533}
+        }
+      },
+      {
+        "motor": "TMOTOR_U8II_100",
+        "propeller": "TMOTOR_CF_28X92",
+        "battery_cells": 12,
+        "throttle_curve": {
+          "25": {"thrust_g": 2800, "current_a": 5.5, "power_w": 245},
+          "50": {"thrust_g": 6200, "current_a": 18, "power_w": 802},
+          "75": {"thrust_g": 9500, "current_a": 35, "power_w": 1560},
+          "100": {"thrust_g": 12000, "current_a": 50, "power_w": 2230}
+        }
+      }
+    ]
+  },
+  "selection_guidelines": {
+    "by_motor_size": {
+      "2205_class": ["4.5-5.5 inch", "3-blade preferred"],
+      "2806_class": ["6-7 inch", "2-3 blade"],
+      "U5_class": ["13-17 inch", "2 blade"],
+      "U8_class": ["26-30 inch", "2 blade"]
+    },
+    "by_application": {
+      "fpv_racing": {
+        "diameter_range_in": [4.5, 5.5],
+        "pitch_range_in": [3.5, 5.0],
+        "blades": [3, 4],
+        "priority": "thrust_response"
+      },
+      "cinematography": {
+        "diameter_range_in": [9, 17],
+        "pitch_range_in": [4, 6],
+        "blades": [2],
+        "priority": "low_noise"
+      },
+      "agriculture": {
+        "diameter_range_in": [26, 34],
+        "pitch_range_in": [8, 12],
+        "blades": [2],
+        "priority": "efficiency",
+        "foldable": true
+      },
+      "long_range": {
+        "diameter_range_in": [7, 10],
+        "pitch_range_in": [3, 5],
+        "blades": [2],
+        "priority": "efficiency"
+      }
+    }
+  }
+}

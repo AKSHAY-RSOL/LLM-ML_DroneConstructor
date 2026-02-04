@@ -1,0 +1,72 @@
+# DroneForge AI - Dependencies
+# Core Framework
+langchain>=0.2.0
+langchain-core>=0.2.0
+langgraph>=0.2.0
+langchain-community>=0.2.0
+
+# LLM Providers
+langchain-openai>=0.1.0
+langchain-anthropic>=0.1.0
+langchain-google-genai>=1.0.0
+langchain-ollama>=1.0.0
+ollama>=0.6.0
+
+# Data Processing
+pandas>=2.0.0
+numpy>=1.24.0
+scipy>=1.11.0
+json5>=0.9.0
+
+# Optimization
+pymoo>=0.6.0
+optuna>=3.0.0
+
+# CAD Generation
+cadquery>=2.4.0
+numpy-stl>=3.0.0
+trimesh>=4.0.0
+svgwrite>=1.4.0
+
+# Web Interface
+flask>=3.0.0
+flask-cors>=4.0.0
+flask-socketio>=5.3.0
+
+# CLI
+click>=8.1.0
+rich>=13.0.0
+questionary>=2.0.0
+
+# Visualization
+matplotlib>=3.7.0
+plotly>=5.15.0
+
+# Documentation Generation
+python-docx>=1.0.0
+reportlab>=4.0.0
+jinja2>=3.1.0
+markdown>=3.4.0
+weasyprint>=60.0
+
+# Simulation
+control>=0.9.0
+
+# MATLAB Interface (optional)
+# matlabengine>=23.2.0  # Uncomment if MATLAB is installed
+
+# Utilities
+pyyaml>=6.0.0
+python-dotenv>=1.0.0
+pydantic>=2.0.0
+typing-extensions>=4.8.0
+tqdm>=4.65.0
+
+# Testing
+pytest>=7.4.0
+pytest-asyncio>=0.21.0
+
+# Development
+black>=23.0.0
+isort>=5.12.0
+mypy>=1.5.0
