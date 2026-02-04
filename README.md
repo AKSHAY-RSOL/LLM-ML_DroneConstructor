@@ -9,6 +9,8 @@
 </p>
 
 <p align="center">
+  <a href="https://github.com/AKSHAY-RSOL/LLM-ML_DroneConstructor/stargazers"><img src="https://img.shields.io/github/stars/AKSHAY-RSOL/LLM-ML_DroneConstructor?style=flat-square" alt="Stars"/></a>
+  <a href="https://github.com/AKSHAY-RSOL/LLM-ML_DroneConstructor/network/members"><img src="https://img.shields.io/github/forks/AKSHAY-RSOL/LLM-ML_DroneConstructor?style=flat-square" alt="Forks"/></a>
   <a href="#features"><img src="https://img.shields.io/badge/Agents-17-green?style=flat-square" alt="17 Agents"/></a>
   <a href="#llm-providers"><img src="https://img.shields.io/badge/LLM-Ollama%20|%20OpenAI%20|%20Anthropic-orange?style=flat-square" alt="LLM Providers"/></a>
   <a href="#license"><img src="https://img.shields.io/badge/License-MIT-yellow?style=flat-square" alt="License"/></a>
@@ -150,8 +152,8 @@ Automatic design iteration until all validation criteria pass:
 ### Step 1: Clone the Repository
 
 ```bash
-git clone https://github.com/yourusername/droneforge-ai.git
-cd droneforge-ai
+git clone https://github.com/AKSHAY-RSOL/LLM-ML_DroneConstructor.git
+cd LLM-ML_DroneConstructor
 ```
 
 ### Step 2: Create Virtual Environment
@@ -304,7 +306,7 @@ Budget: ₹5,00,000
 ## 📁 Project Structure
 
 ```
-droneforge-ai/
+LLM-ML_DroneConstructor/
 ├── main.py                     # Entry point
 ├── requirements.txt            # Python dependencies
 ├── test_installation.py        # Installation verification
@@ -639,16 +641,19 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📞 Support
 
-- **Issues**: [GitHub Issues](https://github.com/yourusername/droneforge-ai/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/yourusername/droneforge-ai/discussions)
-- **Email**: your.email@example.com
+- **Issues**: [GitHub Issues](https://github.com/AKSHAY-RSOL/LLM-ML_DroneConstructor/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/AKSHAY-RSOL/LLM-ML_DroneConstructor/discussions)
 
 ---
 
 <p align="center">
-  <strong>Built with ❤️ for the drone community</strong>
+  <strong>Built with ❤️ by <a href="https://github.com/AKSHAY-RSOL">AKSHAY-RSOL</a></strong>
 </p>
 
 <p align="center">
   <sub>DroneForge AI - Transforming ideas into flying machines</sub>
+</p>
+
+<p align="center">
+  <a href="https://github.com/AKSHAY-RSOL/LLM-ML_DroneConstructor">⭐ Star this repo if you find it useful!</a>
 </p>
