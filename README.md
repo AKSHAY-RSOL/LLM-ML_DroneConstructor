@@ -2,7 +2,7 @@
   <img src="https://img.shields.io/badge/DroneForge-AI-blue?style=for-the-badge&logo=drone" alt="DroneForge AI"/>
 </p>
 
-<h1 align="center">🚁 DroneForge AI</h1>
+<h1 align="center"> DroneForge AI</h1>
 
 <p align="center">
   <strong>Multi-Agent LLM-Based System for Automated UAV Design</strong>
@@ -25,7 +25,7 @@
 
 ---
 
-## 📋 Table of Contents
+##  Table of Contents
 
 - [Overview](#-overview)
 - [Key Features](#-key-features)
@@ -43,7 +43,7 @@
 
 ---
 
-## 🎯 Overview
+##  Overview
 
 **DroneForge AI** is an intelligent, multi-agent system that automates the entire UAV (drone) design process. Using Large Language Models (LLMs) orchestrated through LangGraph, it transforms natural language mission requirements into comprehensive, physics-validated drone designs.
 
@@ -63,9 +63,9 @@ DroneForge AI provides:
 
 ---
 
-## ✨ Key Features
+##  Key Features
 
-### 🤖 17 Specialized AI Agents
+###  17 Specialized AI Agents
 
 | Phase | Agents | Description |
 |-------|--------|-------------|
@@ -74,14 +74,14 @@ DroneForge AI provides:
 | **Integration** | CoG, Autonomy, Software, Wiring, CAD, Regulatory | System integration & compliance |
 | **Validation** | Validator, Optimizer, BOM, Documentation | Quality assurance & outputs |
 
-### 🔬 Physics-Based Calculations
+###  Physics-Based Calculations
 
 - **Thrust equations**: $T = C_T \cdot \rho \cdot n^2 \cdot D^4$
 - **Structural analysis**: Beam bending, safety factors
 - **Power budgeting**: Energy consumption, flight time estimation
 - **Aerodynamic analysis**: Drag coefficients, stability margins
 
-### 📦 Complete Output Generation
+### Complete Output Generation
 
 - ✅ **Parametric CAD models** (OpenSCAD, CadQuery)
 - ✅ **Wiring diagrams** (SVG with connection tables)
@@ -90,7 +90,7 @@ DroneForge AI provides:
 - ✅ **Engineering justification report**
 - ✅ **Regulatory compliance checklist**
 
-### 🔄 Validation-Optimization Loop
+###  Validation-Optimization Loop
 
 Automatic design iteration until all validation criteria pass:
 - Thrust-to-weight ratio ≥ 2.0
@@ -100,7 +100,7 @@ Automatic design iteration until all validation criteria pass:
 
 ---
 
-## 🏗️ System Architecture
+##  System Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
@@ -145,7 +145,7 @@ Automatic design iteration until all validation criteria pass:
 
 ---
 
-## 💻 Installation
+## Installation
 
 ### Prerequisites
 
@@ -205,7 +205,7 @@ Expected output:
 
 ---
 
-## 🚀 Quick Start
+##  Quick Start
 
 ### Interactive CLI
 
@@ -253,7 +253,7 @@ print(f"Estimated Cost: ₹{result['bom']['total_cost_inr']:,.0f}")
 
 ---
 
-## 📖 Usage
+##  Usage
 
 ### Command Line Options
 
@@ -314,7 +314,7 @@ Budget: ₹5,00,000
 
 ---
 
-## 📁 Project Structure
+##  Project Structure
 
 ```
 LLM-ML_DroneConstructor/
@@ -394,7 +394,7 @@ LLM-ML_DroneConstructor/
 
 ---
 
-## 🤖 Agent Details
+##  Agent Details
 
 ### Phase 1: Requirements Analysis
 
@@ -435,7 +435,7 @@ LLM-ML_DroneConstructor/
 
 ---
 
-## ⚙️ Configuration
+## Configuration
 
 ### LLM Configuration (`config/llm_config.yaml`)
 
@@ -477,7 +477,7 @@ safety_margins:
 
 ---
 
-## 📊 Output Examples
+## Output Examples
 
 ### Complete Design JSON
 
@@ -543,7 +543,7 @@ frame();
 
 ---
 
-## 🔌 API Reference
+## API Reference
 
 ### DroneForgeWorkflow
 
@@ -611,7 +611,7 @@ class DroneDesignState(TypedDict, total=False):
 
 ---
 
-## 🧪 Testing
+##  Testing
 
 ```bash
 # Run installation tests
@@ -626,7 +626,7 @@ pytest tests/ -v
 
 ---
 
-## 🤝 Contributing
+##  Contributing
 
 Contributions are welcome! Please follow these steps:
 
@@ -652,13 +652,13 @@ mypy src/
 
 ---
 
-## 📄 License
+##  License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ---
 
-## 🙏 Acknowledgments
+##  Acknowledgments
 
 - [LangChain](https://www.langchain.com/) for the LLM framework
 - [LangGraph](https://python.langchain.com/docs/langgraph/) for the agent orchestration
@@ -667,7 +667,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-## 📞 Support
+##  Support
 
 - **Issues**: [GitHub Issues](https://github.com/AKSHAY-RSOL/LLM-ML_DroneConstructor/issues)
 - **Discussions**: [GitHub Discussions](https://github.com/AKSHAY-RSOL/LLM-ML_DroneConstructor/discussions)
