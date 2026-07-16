@@ -140,6 +140,9 @@ Automatic design iteration until all validation criteria pass:
 └─────────────────────────────────────────────────────────────────────────┘
 ```
 
+> [!NOTE]
+> **Engineering Execution Model**: DroneForge AI uses an LLM (such as Llama 3.1 or GPT-4) in the **Mission Analyzer** stage to parse unstructured natural language requirements into a structured, typed specification (`MissionRequirements`). The subsequent design, analysis, and validation stages are governed by deterministic physics calculations, component catalog databases, and closed-form engineering algorithms. This hybrid approach guarantees calculation correctness, reliability, and physical safety while eliminating LLM mathematical hallucinations.
+
 ---
 
 ## 💻 Installation
@@ -258,13 +261,20 @@ print(f"Estimated Cost: ₹{result['bom']['total_cost_inr']:,.0f}")
 python main.py [OPTIONS]
 
 Options:
-  --web                 Start web interface (default: CLI mode)
+  --web                 Start web interface instead of CLI
+  -m, --mission TEXT    Mission statement for direct design (skip interactive mode)
+  -i, --interactive     Force interactive CLI mode
+  --host HOST           Web server host (default: 0.0.0.0)
   --port PORT           Web server port (default: 5000)
-  --llm PROVIDER        LLM provider: ollama, openai, anthropic (default: ollama)
-  --model MODEL         Model name (default: llama3.1:8b)
-  --output DIR          Output directory (default: ./output)
-  --verbose             Enable verbose logging
-  --help                Show help message
+  --debug               Enable debug mode for web server
+  -p, --provider PROV   LLM provider: ollama, openai, anthropic, google, azure (default: ollama)
+  --model MODEL         Model name (default: llama3.1:8b or gpt-4)
+  --cad-detail DETAIL   CAD detail level: basic, detailed (default: basic)
+  -j, --jurisdictions   Regulatory jurisdictions list (default: india_dgca)
+  -o, --output DIR      Output directory
+  --list-providers      List available LLM providers
+  --list-jurisdictions  List supported regulatory jurisdictions
+  -h, --help            Show help message
 ```
 
 ### Example Mission Statements
@@ -559,27 +569,44 @@ class DroneForgeWorkflow:
 ### State Classes
 
 ```python
-@dataclass
-class DroneDesignState:
+class DroneDesignState(TypedDict, total=False):
+    # Input
     mission_statement: str
+    cad_detail_level: str
+    
+    # LLM configuration
+    llm_provider: str
+    llm_model: str
+    
+    # Parsed requirements
     mission_requirements: MissionRequirements
-    frame_topology: FrameTopology
+    
+    # Design outputs from agents
     propulsion_design: PropulsionDesign
     aerodynamics_analysis: AerodynamicsAnalysis
     structural_design: StructuralDesign
     power_design: PowerDesign
     electronics_design: ElectronicsDesign
-    cog_analysis: CogAnalysis
-    autonomy_config: AutonomyConfig
+    cog_analysis: CenterOfGravity
+    autonomy_design: AutonomyDesign
     software_config: SoftwareConfig
     wiring_design: WiringDesign
-    cad_output: CadOutput
+    cad_design: CADDesign
     regulatory_compliance: RegulatoryCompliance
+    
+    # Validation and optimization
     validation_result: ValidationResult
     optimization_result: OptimizationResult
-    bom: BillOfMaterials
-    documentation: Documentation
+    
+    # Final outputs
+    bill_of_materials: BillOfMaterials
+    documentation: Dict[str, Any]
+    
+    # Workflow control
+    current_agent: str
     iteration: int
+    errors: List[str]
+    warnings: List[str]
 ```
 
 ---
