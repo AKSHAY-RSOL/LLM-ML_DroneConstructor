@@ -167,6 +167,7 @@ class StructuralDesign:
     
     # Bill of materials for structure
     structural_bom: List[Dict[str, Any]] = field(default_factory=list)
+    frame_selection: Dict[str, Any] = field(default_factory=dict)
     
     calculations: Dict[str, Any] = field(default_factory=dict)
     justifications: List[str] = field(default_factory=list)
@@ -195,6 +196,7 @@ class PowerDesign:
     
     # Voltage regulation
     bec_requirements: List[Dict[str, Any]] = field(default_factory=list)
+    safety_thresholds: Dict[str, Any] = field(default_factory=dict)
     
     calculations: Dict[str, Any] = field(default_factory=dict)
     justifications: List[str] = field(default_factory=list)
@@ -286,6 +288,9 @@ class AutonomyDesign:
     supported_missions: List[str] = field(default_factory=list)
     ground_station_software: str = ""
     
+    # Selected firmware (BUG-046)
+    firmware: str = "ArduPilot"
+    
     calculations: Dict[str, Any] = field(default_factory=dict)
     justifications: List[str] = field(default_factory=list)
 
@@ -353,7 +358,7 @@ class CADDesign:
     dxf_files: List[str] = field(default_factory=list)
     
     # OpenSCAD/CadQuery code
-    cad_code: str = ""
+    cad_code: Dict[str, str] = field(default_factory=dict)
     
     # 3D printing recommendations
     print_settings: Dict[str, Any] = field(default_factory=dict)
@@ -480,6 +485,7 @@ class DroneDesignState(TypedDict, total=False):
     
     # Final outputs
     bill_of_materials: BillOfMaterials
+    documentation: Dict[str, Any] # BUG-041: added documentation field to prevent LangGraph drop
     
     # Workflow control
     current_agent: str

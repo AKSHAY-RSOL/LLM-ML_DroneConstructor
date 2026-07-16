@@ -48,19 +48,50 @@ class ValidatorAgent:
         
         # Thrust to weight validation
         total_thrust = propulsion.get('total_thrust_n', 0)
-        weight_n = auw_kg * 9.81
+        mission_req_obj = state.get('mission_requirements', {})
+        if hasattr(mission_req_obj, '__dict__'):
+            mission_req_dict = asdict(mission_req_obj)
+        else:
+            mission_req_dict = mission_req_obj if isinstance(mission_req_obj, dict) else {}
+            
+        drone_type = mission_req_dict.get('drone_type', 'multirotor')
+        if hasattr(drone_type, 'value'):
+            drone_type = drone_type.value
+        drone_type = str(drone_type).lower()
         
+        if 'fixed_wing' in drone_type or 'flying_wing' in drone_type or drone_type == 'conventional':
+            tw_min = 0.5
+            tw_rec = 0.7
+        elif 'vtol' in drone_type or 'quadplane' in drone_type or 'tailsitter' in drone_type:
+            tw_min = 1.2
+            tw_rec = 1.5
+        else:
+            tw_min = self.SAFETY_MARGINS['thrust_to_weight_min']
+            tw_rec = self.SAFETY_MARGINS['thrust_to_weight_recommended']
+            
+        weight_n = auw_kg * 9.81
         if weight_n > 0:
             tw_ratio = total_thrust / weight_n
             
-            if tw_ratio < self.SAFETY_MARGINS['thrust_to_weight_min']:
-                issues.append(f"Thrust-to-weight ratio {tw_ratio:.2f} is below minimum {self.SAFETY_MARGINS['thrust_to_weight_min']}")
-            elif tw_ratio < self.SAFETY_MARGINS['thrust_to_weight_recommended']:
-                warnings.append(f"Thrust-to-weight ratio {tw_ratio:.2f} is below recommended {self.SAFETY_MARGINS['thrust_to_weight_recommended']}")
+            if tw_ratio < tw_min:
+                issues.append(f"Thrust-to-weight ratio {tw_ratio:.2f} is below minimum {tw_min}")
+            elif tw_ratio < tw_rec:
+                warnings.append(f"Thrust-to-weight ratio {tw_ratio:.2f} is below recommended {tw_rec}")
         
         # Power budget validation
         total_power = power.get('total_max_power_w', 0)
-        battery_power = power.get('total_energy_wh', 0) * 10  # Rough max power estimate
+        
+        # Calculate real max continuous battery power: C_rating * Capacity (Ah) * Voltage
+        battery = power.get('battery', {})
+        battery_specs = battery.get('specs', {}) if isinstance(battery, dict) else {}
+        c_rating = battery_specs.get('c_rating', 25)
+        capacity_mah = power.get('total_capacity_mah', 5000)
+        total_voltage = power.get('total_voltage_v', 22.2)
+        
+        if c_rating and capacity_mah and total_voltage:
+            battery_power = c_rating * (capacity_mah / 1000.0) * total_voltage
+        else:
+            battery_power = power.get('total_energy_wh', 0) * 10  # Fallback
         
         if total_power > battery_power * 0.9:
             issues.append(f"Power draw {total_power:.0f}W may exceed battery capability")
@@ -107,27 +138,29 @@ class ValidatorAgent:
         electronics = to_dict(state.get('electronics_design', {}))
         structural = to_dict(state.get('structural_design', {}))
         
-        # Motor-ESC compatibility
+        # Motor-ESC compatibility — check all pairs (BUG-033)
         motors = propulsion.get('motors', [{}])
         escs = propulsion.get('escs', [{}])
+        motor_count = propulsion.get('motor_count', len(motors))
         
-        if motors and escs:
-            motor_max_current = motors[0].get('specs', {}).get('max_current_a', 30)
-            esc_rating = escs[0].get('specs', {}).get('current_rating_a', 30)
+        # De-duplicate motor/ESC lists for checking (they may be the same object repeated)
+        motors_to_check = motors[:1] if motors else [{}]  # All are identical copies; check one spec
+        escs_to_check = escs[:1] if escs else [{}]
+        
+        actual_cells = power.get('battery', {}).get('specs', {}).get('cell_count', 0) or \
+                       power.get('calculations', {}).get('cell_count', 6)
+        
+        if motors_to_check and escs_to_check:
+            motor_max_current = motors_to_check[0].get('specs', {}).get('max_current_a', 30)
+            esc_rating = escs_to_check[0].get('specs', {}).get('current_rating_a', 30)
             
             if esc_rating < motor_max_current * 1.1:
-                issues.append(f"ESC rating {esc_rating}A may be insufficient for motor max {motor_max_current}A")
+                issues.append(f"ESC rating {esc_rating}A may be insufficient for motor max current {motor_max_current}A (needs {motor_max_current * 1.1:.0f}A)")
         
-        # Motor-Battery voltage compatibility
-        if motors:
-            motor_kv = motors[0].get('specs', {}).get('kv', 700)
-            battery_voltage = power.get('total_voltage_v', 22.2)
-            
-            # Check if motor can handle voltage
-            motor_cells = motors[0].get('specs', {}).get('cell_count_max', 6)
-            actual_cells = power.get('battery', {}).get('specs', {}).get('cell_count', 6)
-            
-            if actual_cells > motor_cells:
+        # Motor-Battery voltage compatibility (BUG-033: use already-retrieved actual_cells)
+        if motors_to_check:
+            motor_cells = motors_to_check[0].get('specs', {}).get('cell_count_max', 6)
+            if actual_cells > 0 and actual_cells > motor_cells:
                 issues.append(f"Battery {actual_cells}S exceeds motor max {motor_cells}S rating")
         
         # Propeller-Frame clearance
@@ -137,18 +170,15 @@ class ValidatorAgent:
             wheelbase = structural.get('wheelbase_mm', 500)
             motor_count = propulsion.get('motor_count', 4)
             
-            # Calculate min spacing between props
-            if motor_count == 4:
-                motor_spacing = wheelbase / math.sqrt(2)
-            else:
-                motor_spacing = wheelbase * math.pi / motor_count
-            
-            clearance = motor_spacing - prop_diameter_mm
-            
-            if clearance < 10:
-                issues.append(f"Propeller clearance {clearance:.0f}mm is dangerously low")
-            elif clearance < 20:
-                warnings.append(f"Propeller clearance {clearance:.0f}mm is tight")
+            # Calculate min spacing between props using exact chord length: wheelbase * sin(pi / motor_count)
+            if motor_count > 1:
+                motor_spacing = wheelbase * math.sin(math.pi / motor_count)
+                clearance = motor_spacing - prop_diameter_mm
+                
+                if clearance < 10:
+                    issues.append(f"Propeller clearance {clearance:.0f}mm is dangerously low")
+                elif clearance < 20:
+                    warnings.append(f"Propeller clearance {clearance:.0f}mm is tight")
         
         # FC-Motor output compatibility
         fc = electronics.get('flight_controller', {})
@@ -213,11 +243,25 @@ class ValidatorAgent:
         elif actual_c > battery_c * 0.8:
             warnings.append(f"Max current {max_current:.0f}A is near battery limit ({battery_c * capacity_ah:.0f}A)")
         
-        # Failsafe configuration
-        if not autonomy.get('return_to_home', True):
+        # Failsafe configuration (BUG-029: AutonomyDesign has bool fields, not nested dicts)
+        # AutonomyDesign.return_to_home is a direct bool field; after asdict() → {'return_to_home': True}
+        safety_feats = autonomy.get('safety_features', {})
+        
+        rth_enabled = autonomy.get('return_to_home', None)
+        if rth_enabled is None:
+            rth_enabled = safety_feats.get('return_to_home', True)
+        if isinstance(rth_enabled, dict):
+            rth_enabled = rth_enabled.get('enabled', True)  # Fallback for old nested format
+        if not rth_enabled:
             warnings.append("Return-to-home is disabled - consider enabling for safety")
         
-        if not autonomy.get('geofencing_enabled', True):
+        geo_enabled = autonomy.get('geofencing_enabled', None)
+        if geo_enabled is None:
+            # Check 'geofencing' or 'geofencing_enabled' under safety_features
+            geo_enabled = safety_feats.get('geofencing', safety_feats.get('geofencing_enabled', True))
+        if isinstance(geo_enabled, dict):
+            geo_enabled = geo_enabled.get('enabled', True)
+        if not geo_enabled:
             warnings.append("Geofencing is disabled - consider enabling for safety")
         
         # Low battery threshold
@@ -291,6 +335,120 @@ class ValidatorAgent:
         
         return recommendations
     
+    def _validate_budget(self, state: Dict[str, Any]) -> Dict:
+        """Validate cost against target budget"""
+        issues = []
+        warnings = []
+        
+        # Helper to convert dataclass to dict
+        def to_dict(obj):
+            if hasattr(obj, '__dict__') and not isinstance(obj, dict):
+                return asdict(obj)
+            return obj if isinstance(obj, dict) else {}
+            
+        mission_req = to_dict(state.get('mission_requirements', {}))
+        target_budget = mission_req.get('max_cost', 0.0) or mission_req.get('budget_usd', 0.0)
+        currency = mission_req.get('currency', 'USD').upper()
+        
+        if target_budget <= 0:
+            return {'valid': True, 'issues': [], 'warnings': []}
+            
+        # Convert budget to USD if it is in INR (using exchange rate 95)
+        target_budget_usd = target_budget / 95.0 if currency == 'INR' else target_budget
+            
+        # Sum up component costs
+        total_cost = 0.0
+        
+        propulsion = to_dict(state.get('propulsion_design', {}))
+        power = to_dict(state.get('power_design', {}))
+        electronics = to_dict(state.get('electronics_design', {}))
+        structural = to_dict(state.get('structural_design', {}))
+        
+        # Motors
+        motors = propulsion.get('motors', [])
+        motor_count = propulsion.get('motor_count', 4)
+        for motor in motors:
+            specs = motor.get('specs', {})
+            price = specs.get('price_usd', motor.get('price_usd', 30.0))
+            if len(motors) == 1:
+                total_cost += price * motor_count
+            else:
+                total_cost += price
+            
+        # Propellers
+        props = propulsion.get('propellers', [])
+        for prop in props:
+            price = prop.get('unit_price', prop.get('price_inr', 200.0) / 95.0)
+            if len(props) == 1:
+                total_cost += price * (motor_count * 2)  # Include spares
+            else:
+                total_cost += price * 2  # 2 props per motor (one working, one spare)
+            
+        # ESCs
+        escs = propulsion.get('escs', [])
+        for esc in escs:
+            specs = esc.get('specs', {})
+            price = specs.get('price_usd', esc.get('price_usd', 20.0))
+            if len(escs) == 1:
+                total_cost += price * motor_count
+            else:
+                total_cost += price
+            
+        # Battery
+        battery = to_dict(power.get('battery', {}))
+        if battery:
+            specs = battery.get('specs', {})
+            price = specs.get('price_usd', battery.get('price_usd', 100.0))
+            total_cost += price
+            
+        # FC & Electronics
+        fc = to_dict(electronics.get('flight_controller', {}))
+        if fc:
+            specs = fc.get('specs', {})
+            price = specs.get('price_usd', fc.get('price_usd', 120.0))
+            total_cost += price
+            
+        gps = to_dict(electronics.get('gps_module', {}))
+        if gps:
+            total_cost += gps.get('price_usd', 50.0)
+            
+        receiver = to_dict(electronics.get('receiver', {}))
+        if receiver:
+            total_cost += receiver.get('price_usd', 30.0)
+            
+        telemetry = to_dict(electronics.get('telemetry_system', {}))
+        if telemetry:
+            total_cost += telemetry.get('price_usd', 50.0)
+            
+        pdb = to_dict(electronics.get('pdb', {}))
+        if pdb:
+            total_cost += pdb.get('price_usd', 20.0)
+            
+        # Frame
+        frame = to_dict(structural.get('frame_selection', {}))
+        if frame:
+            total_cost += frame.get('price_usd', 100.0)
+        else:
+            bom = structural.get('structural_bom', [])
+            for item in bom:
+                total_cost += item.get('unit_price', 0.0) * item.get('quantity', 1)
+                
+        total_cost += 30.0  # Wires & misc
+        
+        # Compare
+        if total_cost > target_budget_usd:
+            overage_percent = ((total_cost - target_budget_usd) / target_budget_usd) * 100
+            if overage_percent > 15.0:
+                issues.append(f"Estimated build cost ${total_cost:.1f} exceeds target budget ${target_budget_usd:.1f} by {overage_percent:.1f}%")
+            else:
+                warnings.append(f"Estimated build cost ${total_cost:.1f} exceeds target budget ${target_budget_usd:.1f} by {overage_percent:.1f}%")
+                
+        return {
+            'valid': len(issues) == 0,
+            'issues': issues,
+            'warnings': warnings
+        }
+
     def validate(self, state: Dict[str, Any]) -> Any:
         """
         Validate the complete design.
@@ -308,36 +466,45 @@ class ValidatorAgent:
         compat_result = self._validate_compatibility(state)
         safety_result = self._validate_safety(state)
         regulatory_result = self._validate_regulatory(state)
+        budget_result = self._validate_budget(state)
         
-        # Aggregate results
-        all_issues = []
-        all_warnings = []
+        # Aggregate results — deduplicate to prevent BUG-016, BUG-017 duplicate messages
+        all_issues_raw = []
+        all_warnings_raw = []
         
         for name, result in [('physics', physics_result), 
                             ('compatibility', compat_result),
                             ('safety', safety_result),
-                            ('regulatory', regulatory_result)]:
+                            ('regulatory', regulatory_result),
+                            ('budget', budget_result)]:
             for issue in result.get('issues', []):
-                all_issues.append(f"[{name.upper()}] {issue}")
+                all_issues_raw.append(f"[{name.upper()}] {issue}")
             for warning in result.get('warnings', []):
-                all_warnings.append(f"[{name.upper()}] {warning}")
+                all_warnings_raw.append(f"[{name.upper()}] {warning}")
+        
+        # Remove exact duplicates while preserving insertion order (BUG-016, BUG-017)
+        all_issues = list(dict.fromkeys(all_issues_raw))
+        all_warnings = list(dict.fromkeys(all_warnings_raw))
         
         # Generate recommendations
         recommendations = self._generate_recommendations({
             'physics': physics_result,
             'compatibility': compat_result,
             'safety': safety_result,
-            'regulatory': regulatory_result
+            'regulatory': regulatory_result,
+            'budget': budget_result
         })
         
         # Determine overall validity
         all_valid = (physics_result['valid'] and 
                     compat_result['valid'] and 
-                    safety_result['valid'])
+                    safety_result['valid'] and
+                    regulatory_result['valid'] and
+                    budget_result['valid'])
         
         # Separate critical issues
         critical_issues = [i for i in all_issues if any(
-            word in i.lower() for word in ['exceed', 'insufficient', 'dangerous', 'below minimum']
+            word in i.lower() for word in ['exceed', 'insufficient', 'dangerous', 'below minimum', 'fail', 'error', 'invalid', 'mismatch', 'above limit']
         )]
         
         # Build validation result

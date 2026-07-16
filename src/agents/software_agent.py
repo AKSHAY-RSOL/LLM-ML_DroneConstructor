@@ -62,7 +62,7 @@ class SoftwareAgent:
     
     def _calculate_pids(self, config: str, auw_kg: float, 
                        moi: Dict[str, float]) -> Dict:
-        """Calculate PID values based on physical properties"""
+        """Calculate PID values based on physical properties (BUG-053)"""
         # Start with defaults
         base_pids = self.DEFAULT_PIDS.get(config, self.DEFAULT_PIDS['quadcopter_x'])
         
@@ -75,13 +75,25 @@ class SoftwareAgent:
         iyy = moi.get('iyy_kg_m2', 0.01)
         izz = moi.get('izz_kg_m2', 0.02)
         
-        # Larger MOI = lower gains needed
-        moi_factor = 0.01 / max(ixx, 0.001)
-        moi_factor = max(0.3, min(3.0, moi_factor))
+        # Reference MOI values for a 1kg reference quadcopter: ixx ≈ 0.005, iyy ≈ 0.005, izz ≈ 0.01
+        roll_moi_factor = 0.005 / max(ixx, 0.0005)
+        roll_moi_factor = max(0.3, min(3.0, roll_moi_factor))
+        
+        pitch_moi_factor = 0.005 / max(iyy, 0.0005)
+        pitch_moi_factor = max(0.3, min(3.0, pitch_moi_factor))
+        
+        yaw_moi_factor = 0.01 / max(izz, 0.001)
+        yaw_moi_factor = max(0.3, min(3.0, yaw_moi_factor))
         
         scaled_pids = {}
         for axis, values in base_pids.items():
-            factor = weight_factor * moi_factor if axis != 'yaw' else 1.0
+            if axis == 'roll':
+                factor = weight_factor * roll_moi_factor
+            elif axis == 'pitch':
+                factor = weight_factor * pitch_moi_factor
+            else:  # yaw
+                factor = weight_factor * yaw_moi_factor
+                
             scaled_pids[axis] = {
                 'P': round(values['P'] * factor, 2),
                 'I': round(values['I'] * factor, 3),
@@ -254,7 +266,7 @@ class SoftwareAgent:
         
         return '\n'.join(commands)
     
-    def configure(self, requirements: Any, electronics: Any, propulsion: Any, autonomy: Any, cog: Any) -> Any:
+    def configure(self, requirements: Any, electronics: Any, propulsion: Any, autonomy: Any, cog: Any, power: Any = None) -> Any:
         """
         Configure software settings.
         
@@ -264,6 +276,7 @@ class SoftwareAgent:
             propulsion: Propulsion design
             autonomy: Autonomy design
             cog: Center of gravity analysis
+            power: Power design
             
         Returns:
             SoftwareConfig dataclass
@@ -290,6 +303,11 @@ class SoftwareAgent:
             autonomy = asdict(autonomy)
         else:
             autonomy = autonomy if isinstance(autonomy, dict) else {}
+            
+        if hasattr(power, '__dict__') and not isinstance(power, dict):
+            power_dict = asdict(power)
+        else:
+            power_dict = power if isinstance(power, dict) else {}
         
         config = mission_req.get('configuration', 'quadcopter_x')
         use_case = mission_req.get('use_case', '')
@@ -309,7 +327,7 @@ class SoftwareAgent:
         rates = self._configure_rates(use_case)
         filters = self._configure_filters(motor_count)
         flight_modes = self._select_flight_modes(firmware, mission_req)
-        failsafes = self._configure_failsafes(autonomy, {})
+        failsafes = self._configure_failsafes(autonomy, power_dict)
         
         # Generate config files
         config_data = {

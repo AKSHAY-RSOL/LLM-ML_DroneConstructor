@@ -232,10 +232,131 @@ drone_frame();
         return code
     
     def _generate_cadquery_code(self, params: Dict, detail: str) -> str:
-        """Generate CadQuery code for the drone frame"""
+        """Generate CadQuery code for the drone frame (BUG-048 / BUG-049)"""
+        config_lower = params.get('configuration', 'quadcopter_x').lower()
+        is_fixed_wing = 'flying_wing' in config_lower or 'conventional' in config_lower or 'delta' in config_lower or 'canard' in config_lower or 'biplane' in config_lower
+        is_vtol = 'quadplane' in config_lower or 'tailsitter' in config_lower or 'tiltrotor' in config_lower or 'lift_cruise' in config_lower
+        
+        if is_fixed_wing or is_vtol:
+            wingspan = params.get('wheelbase_mm', 1400)
+            fuselage_length = wingspan * 0.7
+            wing_chord = wingspan * 0.15
+            wing_thickness = 15
+            motor_count = params.get('motor_count', 1)
+            
+            accessories_code = ""
+            render_accessories = ""
+            if detail == "detailed":
+                accessories_code = """
+def create_flight_controller():
+    return cq.Workplane("XY").workplane(offset=15).box(35, 35, 10)
+
+def create_battery_pack():
+    return cq.Workplane("XY").workplane(offset=-5).box(80, 30, 20)
+"""
+                render_accessories = """
+    # Flight controller and battery
+    fc = create_flight_controller()
+    frame.add(fc, name="flight_controller")
+    bat = create_battery_pack()
+    frame.add(bat, name="battery")
+"""
+            
+            code = f'''# DroneForge AI Generated CadQuery Model
+# Configuration: {params['configuration']}
+# Type: Fixed-Wing/VTOL Airframe (BUG-048 / BUG-049)
+
+import cadquery as cq
+import math
+
+# Parameters
+wingspan = {wingspan}
+fuselage_length = {fuselage_length}
+wing_chord = {wing_chord}
+wing_thickness = {wing_thickness}
+motor_count = {motor_count}
+
+def create_fuselage():
+    return (cq.Workplane("YZ")
+        .cylinder(fuselage_length, wingspan*0.08/2)
+    )
+
+def create_wing():
+    return (cq.Workplane("XY")
+        .box(wingspan, wing_chord, wing_thickness)
+    )
+
+def create_tail():
+    # Vertical stabilizer
+    vert = (cq.Workplane("XZ")
+        .workplane(offset=-fuselage_length/2 + 50)
+        .box(5, wing_chord*0.6, wingspan*0.2)
+        .translate(cq.Vector(0, 0, wingspan*0.1))
+    )
+    # Horizontal stabilizer
+    horiz = (cq.Workplane("XY")
+        .workplane(offset=-fuselage_length/2 + 50)
+        .box(wingspan*0.3, wing_chord*0.5, 5)
+    )
+    return vert.union(horiz)
+{accessories_code}
+def create_frame():
+    frame = cq.Assembly()
+    
+    fuse = create_fuselage()
+    frame.add(fuse, name="fuselage")
+    
+    wing = create_wing()
+    wing_pos = cq.Location(cq.Vector(0, fuselage_length*0.1, 0))
+    frame.add(wing, name="wing", loc=wing_pos)
+    
+    tail = create_tail()
+    frame.add(tail, name="tail")
+    
+    if motor_count > 0:
+        for i in range(motor_count):
+            if motor_count == 1:
+                # Nose motor
+                motor = cq.Workplane("YZ").cylinder(20, (wingspan*0.04)/2)
+                motor_pos = cq.Location(cq.Vector(0, fuselage_length/2, 0))
+                frame.add(motor, name=f"motor_{{i+1}}", loc=motor_pos)
+            else:
+                # Wing motors
+                offset = (1 if i % 2 == 0 else -1) * (wingspan * 0.25) * (1 + (0.3 if i > 1 else 0))
+                motor = cq.Workplane("YZ").cylinder(30, (wingspan*0.03)/2)
+                motor_pos = cq.Location(cq.Vector(offset, fuselage_length*0.1, 0))
+                frame.add(motor, name=f"motor_{{i+1}}", loc=motor_pos)
+    {render_accessories}
+    return frame
+
+if __name__ == "__main__":
+    frame = create_frame()
+    show_object(frame)
+'''
+            return code
+
+        # Multirotor standard layout
+        accessories_code = ""
+        render_accessories = ""
+        if detail == "detailed":
+            accessories_code = """
+def create_flight_controller():
+    return cq.Workplane("XY").workplane(offset=10).box(35, 35, 10)
+
+def create_battery_pack():
+    return cq.Workplane("XY").workplane(offset=-20).box(135, 45, 35)
+"""
+            render_accessories = """
+    # Flight controller and battery
+    fc = create_flight_controller()
+    frame.add(fc, name="flight_controller")
+    bat = create_battery_pack()
+    frame.add(bat, name="battery")
+"""
+            
         code = '''# DroneForge AI Generated CadQuery Model
 # Configuration: {config}
-# Requires: pip install cadquery
+# Detail Level: {detail} (BUG-049)
 
 import cadquery as cq
 import math
@@ -251,6 +372,7 @@ center_thickness = {center_thickness}
 motor_mount = {motor_mount}
 motor_count = {motor_count}
 arm_angles = {arm_angles}
+landing_gear_height = {lg_height}
 
 def create_arm():
     """Create a single arm as hollow tube"""
@@ -290,6 +412,12 @@ def create_center_plate():
     
     return plate
 
+def create_landing_gear_leg():
+    """Create landing gear leg"""
+    leg = cq.Workplane("XY").cylinder(landing_gear_height, 5)
+    foot = cq.Workplane("XY").sphere(7.5)
+    return leg.union(foot)
+{accessories_code}
 def create_frame():
     """Assemble complete frame"""
     frame = cq.Assembly()
@@ -323,20 +451,30 @@ def create_frame():
         mount_y = arm_length * math.sin(rad)
         mount_pos = cq.Location(cq.Vector(mount_x, mount_y, center_thickness))
         frame.add(mount, name=f"motor_mount_{{i+1}}", loc=mount_pos)
-    
+        
+    # Landing gear
+    for i, angle in enumerate([45, 135, 225, 315]):
+        rad = math.radians(angle)
+        leg = create_landing_gear_leg()
+        leg_x = (center_width/2 * 0.7) * math.cos(rad)
+        leg_y = (center_width/2 * 0.7) * math.sin(rad)
+        leg_pos = cq.Location(
+            cq.Vector(leg_x, leg_y, 0),
+            cq.Vector(1, 0, 0), 180
+        )
+        frame.add(leg, name=f"landing_gear_{{i+1}}", loc=leg_pos)
+    {render_accessories}
     return frame
 
 # Create and export
 if __name__ == "__main__":
     frame = create_frame()
-    
-    # Export to STEP
-    # frame.save("drone_frame.step")
-    
-    # For visualization in cq-editor
     show_object(frame)
 '''.format(
             config=params['configuration'],
+            detail=detail,
+            accessories_code=accessories_code,
+            render_accessories=render_accessories,
             wheelbase=params['wheelbase_mm'],
             arm_length=params['arm_length_mm'],
             arm_od=params['arm_outer_diameter_mm'],
@@ -346,7 +484,8 @@ if __name__ == "__main__":
             center_thickness=params['center_plate_thickness_mm'],
             motor_mount=params['motor_mount_pattern_mm'],
             motor_count=params['motor_count'],
-            arm_angles=str(params['arm_angles_deg'])
+            arm_angles=str(params['arm_angles_deg']),
+            lg_height=params['landing_gear_height_mm']
         )
         
         return code

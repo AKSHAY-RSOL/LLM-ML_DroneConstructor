@@ -200,21 +200,14 @@ class AerodynamicsAgent:
                                     weight_n: float, cd: float, 
                                     area_m2: float, density: float) -> float:
         """
-        Calculate maximum wind speed the drone can fly into.
-        
-        Args:
-            available_thrust_n: Total available horizontal thrust
-            weight_n: Weight in Newtons
-            cd: Drag coefficient
-            area_m2: Frontal area
-            density: Air density
-            
-        Returns:
-            Maximum penetration wind speed in m/s
+        Calculate maximum wind speed the drone can fly into using correct physical limits.
         """
-        # Assuming 30% of thrust available for horizontal flight
-        horizontal_thrust = available_thrust_n * 0.3
-        
+        # Physically correct available horizontal thrust: sqrt(T_max^2 - W^2) (BUG-061)
+        if available_thrust_n > weight_n:
+            horizontal_thrust = math.sqrt(available_thrust_n**2 - weight_n**2)
+        else:
+            horizontal_thrust = 0.0
+            
         # V = sqrt(2F / (ρ × Cd × A))
         if cd * area_m2 > 0:
             return math.sqrt(2 * horizontal_thrust / (density * cd * area_m2))
@@ -224,26 +217,29 @@ class AerodynamicsAgent:
                                    density: float) -> float:
         """
         Calculate Reynolds number for aerodynamic analysis.
-        
-        Re = ρ × V × L / μ
-        
-        Returns:
-            Reynolds number (dimensionless)
         """
         return density * velocity_ms * chord_m / self.AIR_VISCOSITY
     
-    def _fixed_wing_analysis(self, mission_req: Dict, propulsion: Dict) -> Dict:
-        """Perform fixed-wing specific aerodynamic analysis"""
-        wing_span_m = mission_req.get('wingspan_mm', 1500) / 1000
-        wing_area_m2 = mission_req.get('wing_area_m2', 0.3)
-        auw_kg = propulsion.get('calculations', {}).get('estimated_auw_kg', 2.0)
-        cruise_speed = mission_req.get('cruise_speed_ms', 15)
+    def _fixed_wing_analysis(self, mission_req: Dict, propulsion: Dict, structural_dict: Dict = None) -> Dict:
+        """Perform fixed-wing specific aerodynamic analysis (BUG-043)"""
+        # Determine wingspan dynamically from structural design if available
+        wingspan_mm = 1500  # Default fallback
+        if structural_dict:
+            wingspan_mm = structural_dict.get('calculations', {}).get('wingspan_mm', 1500)
+            
+        wing_span_m = wingspan_mm / 1000
         
-        # Calculate aspect ratio
-        if wing_area_m2 > 0:
-            aspect_ratio = wing_span_m ** 2 / wing_area_m2
-        else:
-            aspect_ratio = 8  # Typical for small UAVs
+        # Calculate wing area based on realistic aspect ratio (6.5)
+        aspect_ratio = 6.5
+        wing_area_m2 = (wing_span_m ** 2) / aspect_ratio
+        
+        auw_kg = propulsion.get('calculations', {}).get('estimated_auw_kg', 2.0)
+        if structural_dict:
+            auw_kg = structural_dict.get('frame_weight_g', 0) / 1000.0 + propulsion.get('calculations', {}).get('estimated_auw_kg', 2.0) - 0.5  # Adjust for actual frame weight
+            if auw_kg <= 0:
+                auw_kg = 2.0
+                
+        cruise_speed = mission_req.get('cruise_speed_ms', 15)
         
         # Wing loading
         wing_loading = (auw_kg * 9.81) / wing_area_m2  # N/m²
@@ -266,7 +262,7 @@ class AerodynamicsAgent:
         l_d_ratio = cl_cruise / cd_total if cd_total > 0 else 0
         
         return {
-            'wing_area_m2': wing_area_m2,
+            'wing_area_m2': round(wing_area_m2, 4),
             'aspect_ratio': round(aspect_ratio, 2),
             'wing_loading_n_m2': round(wing_loading, 1),
             'lift_coefficient': round(cl_cruise, 3),
@@ -278,16 +274,9 @@ class AerodynamicsAgent:
             'oswald_efficiency': e
         }
     
-    def analyze(self, requirements: Any, propulsion: Any) -> Any:
+    def analyze(self, requirements: Any, propulsion: Any, structural: Any = None) -> Any:
         """
         Analyze aerodynamics based on mission and propulsion design.
-        
-        Args:
-            requirements: Mission requirements (MissionRequirements or dict)
-            propulsion: Propulsion design (PropulsionDesign or dict)
-            
-        Returns:
-            AerodynamicsAnalysis dataclass
         """
         logger.info("Starting aerodynamics analysis")
         
@@ -301,6 +290,11 @@ class AerodynamicsAgent:
             propulsion_dict = asdict(propulsion)
         else:
             propulsion_dict = propulsion if isinstance(propulsion, dict) else {}
+            
+        if structural and hasattr(structural, '__dict__') and not isinstance(structural, dict):
+            structural_dict = asdict(structural)
+        else:
+            structural_dict = structural if isinstance(structural, dict) else {}
         
         drone_type = mission_req.get('drone_type', 'multirotor')
         config = mission_req.get('configuration', 'quadcopter_x')
@@ -347,7 +341,7 @@ class AerodynamicsAgent:
         # Fixed-wing specific analysis
         fw_analysis = {}
         if drone_type_str in ['fixed_wing', 'vtol']:
-            fw_analysis = self._fixed_wing_analysis(mission_req, propulsion_dict)
+            fw_analysis = self._fixed_wing_analysis(mission_req, propulsion_dict, structural_dict)
         
         # Skip LLM call for now - use calculated values
         # This keeps the design fast and avoids async issues

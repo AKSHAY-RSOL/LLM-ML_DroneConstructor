@@ -51,26 +51,26 @@ class WiringAgent:
         return 6, 'AWG 6'
     
     def _select_connector(self, purpose: str, current_a: float) -> Dict:
-        """Select appropriate connector"""
-        if purpose == 'battery' and current_a > 60:
-            return {'type': 'xt90', 'max_current_a': 90}
-        elif purpose == 'battery':
-            return {'type': 'xt60', 'max_current_a': 60}
-        elif purpose == 'motor' and current_a > 30:
-            return {'type': 'bullet_4mm', 'max_current_a': 50}
+        """Select appropriate connector using the CONNECTORS lookup table (BUG-070)"""
+        if purpose == 'battery':
+            if current_a > self.CONNECTORS['xt60']['max_current_a']:
+                return {'type': 'xt90', 'max_current_a': self.CONNECTORS['xt90']['max_current_a']}
+            return {'type': 'xt60', 'max_current_a': self.CONNECTORS['xt60']['max_current_a']}
         elif purpose == 'motor':
-            return {'type': 'bullet_3.5mm', 'max_current_a': 30}
+            if current_a > self.CONNECTORS['bullet_3.5mm']['max_current_a']:
+                return {'type': 'bullet_4mm', 'max_current_a': self.CONNECTORS['bullet_4mm']['max_current_a']}
+            return {'type': 'bullet_3.5mm', 'max_current_a': self.CONNECTORS['bullet_3.5mm']['max_current_a']}
         elif purpose == 'signal':
-            return {'type': 'jst_ph', 'max_current_a': 2}
+            return {'type': 'jst_ph', 'max_current_a': self.CONNECTORS['jst_ph']['max_current_a']}
         elif purpose == 'servo':
-            return {'type': 'servo', 'max_current_a': 5}
+            return {'type': 'servo', 'max_current_a': self.CONNECTORS['servo']['max_current_a']}
         else:
-            return {'type': 'jst_xh', 'max_current_a': 3}
+            return {'type': 'jst_xh', 'max_current_a': self.CONNECTORS['jst_xh']['max_current_a']}
     
     def _build_connection_table(self, electronics: Dict, 
                                 propulsion: Dict,
                                 power: Dict) -> List[Dict]:
-        """Build connection table for all components"""
+        """Build connection table for all components with electrical validation (BUG-022)"""
         connections = []
         
         fc = electronics.get('flight_controller', {})
@@ -78,7 +78,17 @@ class WiringAgent:
         
         # Battery to PDB
         max_current = power.get('calculations', {}).get('max_current_a', 50)
+        if max_current == 0:
+            max_current = power.get('calculations', {}).get('power_budget', {}).get('total_max_w', 500) / max(
+                power.get('total_voltage_v', 22.2), 1.0)
         awg, label = self._get_wire_gauge(max_current)
+        
+        # BUG-022: validate battery connector rating
+        batt_connector_ok = max_current <= (90 if max_current > 60 else 60)
+        batt_connector_type = 'XT90' if max_current > 60 else 'XT60'
+        batt_connector_warning = '' if batt_connector_ok else (
+            f'⚠ {max_current:.0f}A exceeds XT90 (90A) rating — use AS150 or parallel connectors'
+        )
         
         connections.append({
             'id': 1,
@@ -87,14 +97,26 @@ class WiringAgent:
             'to_component': 'PDB',
             'to_port': 'Battery input',
             'wire_type': f'Silicone {label}',
+            'wire_awg': awg,
             'wire_color': 'Red (+) / Black (-)',
-            'connector': 'XT60/XT90',
-            'notes': 'Main power connection'
+            'connector': batt_connector_type,
+            'max_current_a': max_current,
+            'notes': f'Main power connection [{max_current:.0f}A]{" | " + batt_connector_warning if batt_connector_warning else ""}'
         })
         
         # PDB to ESCs
         per_motor_current = max_current / motor_count
         motor_awg, motor_label = self._get_wire_gauge(per_motor_current)
+        
+        # BUG-022: validate motor bullet connector rating
+        motor_bullet_rating = 80 if per_motor_current > 50 else (50 if per_motor_current > 30 else 30)
+        motor_bullet_type = ('bullet_5.5mm' if per_motor_current > 50
+                             else ('bullet_4mm' if per_motor_current > 30 else 'bullet_3.5mm'))
+        motor_connector_warning = ''
+        if per_motor_current > motor_bullet_rating:
+            motor_connector_warning = (
+                f'⚠ {per_motor_current:.0f}A/motor exceeds {motor_bullet_type} ({motor_bullet_rating}A) — use larger bullets'
+            )
         
         for i in range(motor_count):
             connections.append({
@@ -104,9 +126,11 @@ class WiringAgent:
                 'to_component': f'ESC {i+1}',
                 'to_port': 'Power input',
                 'wire_type': f'Silicone {motor_label}',
+                'wire_awg': motor_awg,
                 'wire_color': 'Red (+) / Black (-)',
                 'connector': 'Solder',
-                'notes': f'Motor {i+1} power'
+                'max_current_a': per_motor_current,
+                'notes': f'Motor {i+1} power [{per_motor_current:.0f}A]'
             })
         
         # ESCs to Motors
@@ -117,10 +141,12 @@ class WiringAgent:
                 'from_port': 'Motor output (3-phase)',
                 'to_component': f'Motor {i+1}',
                 'to_port': 'Windings',
-                'wire_type': 'Silicone AWG 16',
+                'wire_type': f'Silicone {motor_label}',
+                'wire_awg': motor_awg,
                 'wire_color': 'Any (match phase order)',
-                'connector': '3.5mm bullet',
-                'notes': 'Swap any 2 to reverse direction'
+                'connector': motor_bullet_type.replace('bullet_', 'bullet '),
+                'max_current_a': per_motor_current,
+                'notes': f'Swap any 2 to reverse direction{" | " + motor_connector_warning if motor_connector_warning else ""}'
             })
         
         # ESC signal wires to FC
@@ -132,8 +158,10 @@ class WiringAgent:
                 'to_component': 'Flight Controller',
                 'to_port': f'Motor {i+1}',
                 'wire_type': 'Servo wire AWG 26',
+                'wire_awg': 26,
                 'wire_color': 'White/Yellow (signal)',
                 'connector': 'JST-SH',
+                'max_current_a': 0.1,
                 'notes': 'PWM/DSHOT signal'
             })
         
@@ -145,8 +173,10 @@ class WiringAgent:
             'to_component': 'GPS Module',
             'to_port': 'Serial',
             'wire_type': 'JST-GH cable',
+            'wire_awg': 28,
             'wire_color': 'Standard',
             'connector': 'JST-GH',
+            'max_current_a': 0.1,
             'notes': 'TX/RX crossed, 5V, GND'
         })
         
@@ -161,8 +191,10 @@ class WiringAgent:
             'to_component': 'Flight Controller',
             'to_port': 'RC input',
             'wire_type': 'Servo wire',
+            'wire_awg': 26,
             'wire_color': 'Signal, 5V, GND',
             'connector': 'Servo/JST',
+            'max_current_a': 0.2,
             'notes': f'{rx_protocol} protocol'
         })
         
@@ -174,8 +206,10 @@ class WiringAgent:
             'to_component': 'Telemetry Radio',
             'to_port': 'Serial',
             'wire_type': 'JST-GH cable',
+            'wire_awg': 28,
             'wire_color': 'Standard',
             'connector': 'JST-GH',
+            'max_current_a': 0.2,
             'notes': 'TX/RX, 5V, GND'
         })
         
@@ -187,8 +221,10 @@ class WiringAgent:
             'to_component': 'Flight Controller',
             'to_port': 'Power input',
             'wire_type': 'Silicone AWG 20',
+            'wire_awg': 20,
             'wire_color': 'Red (+5V) / Black (GND)',
             'connector': 'Solder/JST',
+            'max_current_a': 3.0,
             'notes': '5V regulated power'
         })
         
@@ -241,15 +277,23 @@ class WiringAgent:
         notes.append("Shield video transmitter cables if using analog")
         
         return notes
-    
+
     def _generate_svg_diagram(self, connections: List[Dict], 
                              motor_count: int) -> str:
-        """Generate basic SVG wiring diagram"""
-        # This is a simplified representation
-        # A full implementation would use a proper SVG library
+        """Generate SVG wiring diagram with computed AWG labels (BUG-023)"""
         
         width = 800
-        height = 600
+        height = 660
+        
+        # Extract wire specs from connection table for annotation
+        batt_awg = next((c.get('wire_awg', 10) for c in connections
+                         if c.get('from_component') == 'Battery'), 10)
+        motor_awg = next((c.get('wire_awg', 14) for c in connections
+                          if 'ESC' in c.get('from_component', '')
+                          and 'Motor' in c.get('to_component', '')), 14)
+        batt_max_a = next((c.get('max_current_a', 50) for c in connections
+                           if c.get('from_component') == 'Battery'), 50)
+        per_motor_a = batt_max_a / max(motor_count, 1)
         
         svg = f'''<?xml version="1.0" encoding="UTF-8"?>
 <svg width="{width}" height="{height}" xmlns="http://www.w3.org/2000/svg">
@@ -257,9 +301,11 @@ class WiringAgent:
     <style>
       .component {{ fill: #e0e0e0; stroke: #333; stroke-width: 2; }}
       .label {{ font-family: Arial; font-size: 12px; fill: #333; }}
+      .awg-label {{ font-family: Arial; font-size: 9px; fill: #555; font-style: italic; }}
       .wire-power {{ stroke: #d32f2f; stroke-width: 3; fill: none; }}
       .wire-signal {{ stroke: #1976d2; stroke-width: 2; fill: none; }}
       .wire-ground {{ stroke: #333; stroke-width: 2; fill: none; }}
+      .warning {{ fill: #ff6f00; font-size: 10px; }}
     </style>
   </defs>
   
@@ -268,41 +314,47 @@ class WiringAgent:
     DroneForge AI - Wiring Diagram
   </text>
   
+  <!-- Wire spec summary -->
+  <text x="400" y="50" text-anchor="middle" class="awg-label">
+    Main power: AWG {batt_awg} ({batt_max_a:.0f}A) | Per-motor: AWG {motor_awg} ({per_motor_a:.0f}A)
+  </text>
+  
   <!-- Battery -->
-  <rect x="350" y="500" width="100" height="50" class="component"/>
-  <text x="400" y="530" text-anchor="middle" class="label">Battery</text>
+  <rect x="350" y="520" width="100" height="50" class="component"/>
+  <text x="400" y="548" text-anchor="middle" class="label">Battery</text>
   
   <!-- PDB -->
-  <rect x="350" y="380" width="100" height="50" class="component"/>
-  <text x="400" y="410" text-anchor="middle" class="label">PDB</text>
+  <rect x="350" y="400" width="100" height="50" class="component"/>
+  <text x="400" y="428" text-anchor="middle" class="label">PDB</text>
   
-  <!-- Battery to PDB wire -->
-  <line x1="400" y1="500" x2="400" y2="430" class="wire-power"/>
+  <!-- Battery to PDB wire with AWG label -->
+  <line x1="400" y1="520" x2="400" y2="450" class="wire-power"/>
+  <text x="410" y="490" class="awg-label">AWG {batt_awg}</text>
   
   <!-- Flight Controller -->
-  <rect x="350" y="250" width="100" height="60" class="component"/>
-  <text x="400" y="285" text-anchor="middle" class="label">Flight Controller</text>
+  <rect x="350" y="265" width="100" height="60" class="component"/>
+  <text x="400" y="298" text-anchor="middle" class="label">Flight Controller</text>
   
   <!-- GPS -->
-  <rect x="500" y="180" width="80" height="40" class="component"/>
-  <text x="540" y="205" text-anchor="middle" class="label">GPS</text>
-  <line x1="450" y1="270" x2="500" y2="200" class="wire-signal"/>
+  <rect x="500" y="195" width="80" height="40" class="component"/>
+  <text x="540" y="220" text-anchor="middle" class="label">GPS</text>
+  <line x1="450" y1="285" x2="500" y2="215" class="wire-signal"/>
   
   <!-- Receiver -->
-  <rect x="220" y="180" width="80" height="40" class="component"/>
-  <text x="260" y="205" text-anchor="middle" class="label">Receiver</text>
-  <line x1="350" y1="270" x2="300" y2="200" class="wire-signal"/>
+  <rect x="220" y="195" width="80" height="40" class="component"/>
+  <text x="260" y="220" text-anchor="middle" class="label">Receiver</text>
+  <line x1="350" y1="285" x2="300" y2="215" class="wire-signal"/>
   
   <!-- Telemetry -->
-  <rect x="500" y="260" width="80" height="40" class="component"/>
-  <text x="540" y="285" text-anchor="middle" class="label">Telemetry</text>
-  <line x1="450" y1="280" x2="500" y2="280" class="wire-signal"/>
+  <rect x="500" y="275" width="80" height="40" class="component"/>
+  <text x="540" y="298" text-anchor="middle" class="label">Telemetry</text>
+  <line x1="450" y1="295" x2="500" y2="295" class="wire-signal"/>
 '''
         
-        # Add ESC and Motor boxes
+        # Add ESC and Motor boxes with AWG labels on power wires
         positions = [
-            (100, 350), (700, 350),  # Front ESCs
-            (100, 450), (700, 450)   # Rear ESCs
+            (100, 370), (700, 370),  # Front ESCs
+            (100, 460), (700, 460)   # Rear ESCs
         ]
         
         for i in range(min(motor_count, 4)):
@@ -313,26 +365,29 @@ class WiringAgent:
   <text x="{x}" y="{y+20}" text-anchor="middle" class="label">ESC {i+1}</text>
   
   <!-- Motor {i+1} -->
-  <circle cx="{x}" cy="{y-40}" r="25" class="component"/>
-  <text x="{x}" y="{y-35}" text-anchor="middle" class="label">M{i+1}</text>
+  <circle cx="{x}" cy="{y-50}" r="25" class="component"/>
+  <text x="{x}" y="{y-45}" text-anchor="middle" class="label">M{i+1}</text>
   
-  <!-- ESC to Motor -->
-  <line x1="{x}" y1="{y}" x2="{x}" y2="{y-15}" class="wire-power"/>
+  <!-- ESC to Motor (AWG {motor_awg}) -->
+  <line x1="{x}" y1="{y}" x2="{x}" y2="{y-25}" class="wire-power"/>
+  <text x="{x+3}" y="{y-10}" class="awg-label">AWG {motor_awg}</text>
   
-  <!-- PDB to ESC -->
-  <line x1="350" y1="405" x2="{x}" y2="{y+15}" class="wire-power"/>
+  <!-- PDB to ESC (AWG {motor_awg}) -->
+  <line x1="350" y1="425" x2="{x}" y2="{y+15}" class="wire-power"/>
   
-  <!-- FC to ESC signal -->
-  <line x1="{'350' if x < 400 else '450'}" y1="280" x2="{x}" y2="{y}" class="wire-signal"/>
+  <!-- FC to ESC signal (DSHOT) -->
+  <line x1="{"350" if x < 400 else "450"}" y1="295" x2="{x}" y2="{y}" class="wire-signal"/>
 '''
         
-        svg += '''
+        svg += f'''
   <!-- Legend -->
-  <rect x="20" y="550" width="200" height="40" fill="#f5f5f5" stroke="#ccc"/>
-  <line x1="30" y1="565" x2="60" y2="565" class="wire-power"/>
-  <text x="70" y="570" class="label">Power</text>
-  <line x1="30" y1="580" x2="60" y2="580" class="wire-signal"/>
-  <text x="70" y="585" class="label">Signal</text>
+  <rect x="20" y="580" width="350" height="70" fill="#f5f5f5" stroke="#ccc"/>
+  <text x="30" y="597" class="label" font-weight="bold">Legend</text>
+  <line x1="30" y1="610" x2="70" y2="610" class="wire-power"/>
+  <text x="80" y="615" class="label">Power wire (AWG {batt_awg} main / AWG {motor_awg} motor)</text>
+  <line x1="30" y1="630" x2="70" y2="630" class="wire-signal"/>
+  <text x="80" y="635" class="label">Signal wire (AWG 26-28)</text>
+  <text x="30" y="645" class="awg-label">Total system current: {batt_max_a:.0f}A | Per-motor: {per_motor_a:.0f}A</text>
 </svg>'''
         
         return svg
@@ -391,6 +446,7 @@ class WiringAgent:
             wire_gauge_recommendations=wires,
             connector_list=connectors,
             wiring_diagram_svg=svg,
+            emi_notes=emi_notes,  # BUG-055: Map to top-level field
             calculations={
                 'total_connections': len(connections),
                 'wire_types_count': len(wires),

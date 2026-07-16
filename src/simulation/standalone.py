@@ -6,6 +6,7 @@ Physics-based drone flight simulation without external dependencies.
 import numpy as np
 import json
 import logging
+import math
 from typing import Dict, Any, List, Tuple, Optional
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -295,29 +296,38 @@ class StandaloneSimulator:
         # Forces in body frame (thrust along -z body axis)
         forces = np.array([0, 0, -total_thrust])
         
-        # Moments from motor thrust differences
+        # Moments from motor thrust differences (BUG-062)
         L = self.config.arm_length_m
         
-        if self.config.config_type == "quadcopter_x":
-            # X config: 45 degree arms
-            L_eff = L * np.cos(np.pi/4)  # Effective arm length
-            
-            # Roll moment (positive = right side down)
-            roll_moment = L_eff * (thrusts[0] + thrusts[1] - thrusts[2] - thrusts[3])
-            
-            # Pitch moment (positive = nose up)  
-            pitch_moment = L_eff * (thrusts[0] + thrusts[3] - thrusts[1] - thrusts[2])
-            
-            # Yaw moment from motor torque reaction
-            kQ = 0.01  # Torque coefficient
-            yaw_moment = kQ * (-thrusts[0] + thrusts[1] - thrusts[2] + thrusts[3])
-        else:
-            # Plus config or generic
-            roll_moment = L * (thrusts[3] - thrusts[1]) if len(thrusts) >= 4 else 0
-            pitch_moment = L * (thrusts[0] - thrusts[2]) if len(thrusts) >= 4 else 0
-            kQ = 0.01
-            yaw_moment = kQ * (-thrusts[0] + thrusts[1] - thrusts[2] + thrusts[3]) if len(thrusts) >= 4 else 0
+        roll_moment = 0.0
+        pitch_moment = 0.0
+        yaw_moment = 0.0
+        kQ = 0.01  # Torque coefficient
         
+        if self.config.config_type == "quadcopter_x":
+            L_eff = L * math.cos(math.pi/4)
+            roll_moment = L_eff * (thrusts[0] + thrusts[1] - thrusts[2] - thrusts[3])
+            pitch_moment = L_eff * (thrusts[0] + thrusts[3] - thrusts[1] - thrusts[2])
+            yaw_moment = kQ * (-thrusts[0] + thrusts[1] - thrusts[2] + thrusts[3])
+        elif self.config.config_type == "quadcopter_plus":
+            roll_moment = L * (thrusts[3] - thrusts[1])
+            pitch_moment = L * (thrusts[0] - thrusts[2])
+            yaw_moment = kQ * (-thrusts[0] + thrusts[1] - thrusts[2] + thrusts[3])
+        elif self.config.config_type == "hexacopter_x":
+            # 6-motor geometry: FR, R, RR, RL, L, FL
+            roll_moment = L * (0.5 * thrusts[0] + thrusts[1] + 0.5 * thrusts[2] - 0.5 * thrusts[3] - thrusts[4] - 0.5 * thrusts[5])
+            pitch_moment = L * (thrusts[0] - thrusts[2] - thrusts[3] + thrusts[5])
+            yaw_moment = kQ * (-thrusts[0] + thrusts[1] - thrusts[2] + thrusts[3] - thrusts[4] + thrusts[5])
+        else:
+            # Generic loop over all motors (BUG-062)
+            num_motors = len(thrusts)
+            for i in range(num_motors):
+                angle = math.radians(i * (360.0 / num_motors))
+                cw_ccw = -1 if i % 2 == 0 else 1
+                roll_moment += thrusts[i] * L * math.sin(angle)
+                pitch_moment += -thrusts[i] * L * math.cos(angle)
+                yaw_moment += thrusts[i] * kQ * cw_ccw
+                
         moments = np.array([roll_moment, pitch_moment, yaw_moment])
         
         return forces, moments
@@ -620,13 +630,13 @@ class StandaloneSimulator:
             pitch_cmd = np.clip(0.1 * vx_err, -0.5, 0.5)
             roll_cmd = np.clip(-0.1 * vy_err, -0.5, 0.5)
             
-            # Altitude control
+            # Altitude control (BUG-064: correct NED damping sign)
             g = self.GRAVITY
             m = self.config.mass_kg
             n = self.config.motor_count
             T_max = self.config.max_thrust_per_motor_n
             
-            throttle = (m * g) / (n * T_max) + Kp_alt * ez - Kd * state.vz
+            throttle = (m * g) / (n * T_max) + Kp_alt * ez + Kd * state.vz
             throttle = np.clip(throttle, 0, 1)
             
             return throttle, roll_cmd, pitch_cmd, 0

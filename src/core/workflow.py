@@ -114,9 +114,9 @@ class DroneForgeWorkflow:
         # Add edges (workflow flow)
         graph.add_edge("mission_analyzer", "frame_topology")
         graph.add_edge("frame_topology", "propulsion")
-        graph.add_edge("propulsion", "aerodynamics")
-        graph.add_edge("aerodynamics", "structural")
-        graph.add_edge("structural", "power")
+        graph.add_edge("propulsion", "structural")
+        graph.add_edge("structural", "aerodynamics")
+        graph.add_edge("aerodynamics", "power")
         graph.add_edge("power", "electronics")
         graph.add_edge("electronics", "cog_analysis")
         graph.add_edge("cog_analysis", "autonomy")
@@ -132,11 +132,15 @@ class DroneForgeWorkflow:
             self._should_optimize,
             {
                 "optimize": "optimizer",
-                "regenerate": "propulsion",  # Go back if major issues
+                "regenerate": "propulsion",       # Go back to propulsion if major T/W or motor issues
+                "regenerate_power": "power",      # BUG-013: go back only to power for battery issues
+                "regenerate_structural": "structural", # BUG-036: go back to structural for arm safety/clearance
+                "regenerate_regulatory": "regulatory", # BUG-036: go back to regulatory for certificate issues
                 "continue": "bom_generator"
             }
         )
         
+        # BUG-015: optimizer now patches state before continuing
         graph.add_edge("optimizer", "bom_generator")
         graph.add_edge("bom_generator", "documentation")
         graph.add_edge("documentation", END)
@@ -145,15 +149,45 @@ class DroneForgeWorkflow:
     
     def _should_optimize(self, state: DroneDesignState) -> str:
         """Decide whether to optimize, regenerate, or continue"""
-        validation = state.get("validation_result", ValidationResult())
+        validation = state.get("validation_result", {})
         
-        if validation.critical_issues:
-            logger.warning(f"Critical issues found: {validation.critical_issues}")
+        # Handle both dict and dataclass ValidationResult
+        if hasattr(validation, 'critical_issues'):
+            critical_issues = validation.critical_issues
+            all_valid = validation.all_valid
+        else:
+            critical_issues = validation.get('critical_issues', [])
+            all_valid = validation.get('all_valid', True)
+            
+        if critical_issues:
+            logger.warning(f"Critical issues found: {critical_issues}")
             iteration = state.get("iteration", 0)
             if iteration < 3:  # Max 3 iterations
+                critical_text = ' '.join(str(i) for i in critical_issues).lower()
+                
+                # Check for structural issues
+                is_structural = any(kw in critical_text for kw in ('structural', 'safety factor', 'wheelbase', 'cleared', 'clearance', 'bending', 'stress'))
+                # Check for regulatory issues
+                is_regulatory = any(kw in critical_text for kw in ('dgca', 'faa', 'easa', 'compliant', 'registration', 'uin', 'category'))
+                # Check for power issues
+                is_power = any(kw in critical_text for kw in ('cell', 'battery', 'voltage', 'capacity', 'flight time', 'endurance'))
+                # Check for propulsion issues
+                is_propulsion = any(kw in critical_text for kw in ('thrust', 'motor', 'esc', 'propell', 't/w', 'thrust-to-weight'))
+
+                # Route to structural if it is a structural failure and no propulsion issue
+                if is_structural and not is_propulsion:
+                    return "regenerate_structural"
+                # Route to regulatory if it is regulatory failure and no propulsion/power/structural issue
+                if is_regulatory and not is_propulsion and not is_power and not is_structural:
+                    return "regenerate_regulatory"
+                # Route to power if only power failure
+                if is_power and not is_propulsion and not is_structural and not is_regulatory:
+                    return "regenerate_power"
+                
+                # Default fallback is to go to propulsion
                 return "regenerate"
         
-        if not validation.all_valid:
+        if not all_valid:
             return "optimize"
         
         return "continue"
@@ -210,23 +244,6 @@ class DroneForgeWorkflow:
         
         return {
             "propulsion_design": propulsion,
-            "current_agent": "aerodynamics"
-        }
-    
-    def _aerodynamics_node(self, state: DroneDesignState) -> Dict[str, Any]:
-        """Analyze aerodynamics"""
-        logger.info("💨 Aerodynamics Agent running...")
-        
-        from ..agents.aerodynamics_agent import AerodynamicsAgent
-        
-        requirements = state.get("mission_requirements", MissionRequirements())
-        propulsion = state.get("propulsion_design", PropulsionDesign())
-        
-        agent = AerodynamicsAgent(self.llm)
-        aero = agent.analyze(requirements, propulsion)
-        
-        return {
-            "aerodynamics_analysis": aero,
             "current_agent": "structural"
         }
     
@@ -244,6 +261,24 @@ class DroneForgeWorkflow:
         
         return {
             "structural_design": structure,
+            "current_agent": "aerodynamics"
+        }
+    
+    def _aerodynamics_node(self, state: DroneDesignState) -> Dict[str, Any]:
+        """Analyze aerodynamics"""
+        logger.info("💨 Aerodynamics Agent running...")
+        
+        from ..agents.aerodynamics_agent import AerodynamicsAgent
+        
+        requirements = state.get("mission_requirements", MissionRequirements())
+        propulsion = state.get("propulsion_design", PropulsionDesign())
+        structural = state.get("structural_design", StructuralDesign())
+        
+        agent = AerodynamicsAgent(self.llm)
+        aero = agent.analyze(requirements, propulsion, structural)
+        
+        return {
+            "aerodynamics_analysis": aero,
             "current_agent": "power"
         }
     
@@ -310,9 +345,10 @@ class DroneForgeWorkflow:
         
         requirements = state.get("mission_requirements", MissionRequirements())
         electronics = state.get("electronics_design", ElectronicsDesign())
+        power = state.get("power_design", PowerDesign())
         
         agent = AutonomyAgent(self.llm)
-        autonomy = agent.design(requirements, electronics)
+        autonomy = agent.design(requirements, electronics, power)
         
         return {
             "autonomy_design": autonomy,
@@ -330,9 +366,10 @@ class DroneForgeWorkflow:
         propulsion = state.get("propulsion_design", PropulsionDesign())
         autonomy = state.get("autonomy_design", AutonomyDesign())
         cog = state.get("cog_analysis", CenterOfGravity())
+        power = state.get("power_design", PowerDesign())
         
         agent = SoftwareAgent(self.llm)
-        software = agent.configure(requirements, electronics, propulsion, autonomy, cog)
+        software = agent.configure(requirements, electronics, propulsion, autonomy, cog, power)
         
         return {
             "software_config": software,
@@ -423,10 +460,11 @@ class DroneForgeWorkflow:
         }
     
     def _optimizer_node(self, state: DroneDesignState) -> Dict[str, Any]:
-        """Optimize design"""
+        """Optimize design and apply component swaps back to state (BUG-015)"""
         logger.info("🎯 Optimizer Agent running...")
         
         from ..agents.optimizer_agent import OptimizerAgent
+        from dataclasses import asdict
         
         requirements = state.get("mission_requirements", MissionRequirements())
         validation = state.get("validation_result", ValidationResult())
@@ -434,10 +472,96 @@ class DroneForgeWorkflow:
         agent = OptimizerAgent(self.llm)
         optimization = agent.optimize(state, requirements, validation)
         
-        return {
-            "optimization_result": optimization,
-            "current_agent": "bom_generator"
-        }
+        # BUG-015: Apply component_swaps produced by optimizer back to design state
+        result_state: Dict[str, Any] = {"optimization_result": optimization,
+                                         "current_agent": "bom_generator"}
+        
+        swaps = getattr(optimization, 'component_swaps', {})
+        if isinstance(swaps, dict) and swaps:
+            propulsion = state.get("propulsion_design", {})
+            if hasattr(propulsion, '__dict__') and not isinstance(propulsion, dict):
+                propulsion_dict = asdict(propulsion)
+            else:
+                propulsion_dict = dict(propulsion) if isinstance(propulsion, dict) else {}
+            
+            patched = False
+            new_motor = swaps.get('new_motor')
+            if new_motor:
+                motor_count = propulsion_dict.get('motor_count', 4)
+                # Ensure the new motor has the nested 'specs' block like regular propulsion motors (BUG-072)
+                if 'specs' not in new_motor:
+                    new_motor_wrapped = new_motor.copy()
+                    new_motor_wrapped['specs'] = {}
+                    for k, v in new_motor_wrapped.items():
+                        if k != 'specs':
+                            new_motor_wrapped['specs'][k] = v
+                    if 'continuous_current_a' in new_motor_wrapped:
+                        new_motor_wrapped['specs']['current_rating_a'] = new_motor_wrapped['continuous_current_a']
+                    if 'max_current_a' in new_motor_wrapped:
+                        new_motor_wrapped['specs']['max_current_a'] = new_motor_wrapped['max_current_a']
+                    new_motor = new_motor_wrapped
+                
+                propulsion_dict['motors'] = [new_motor] * motor_count
+                propulsion_dict['escs'] = propulsion_dict.get('escs', [])
+                # Recalculate T/W with new motor thrust
+                from ..agents.propulsion_agent import PropulsionAgent
+                new_thrust_g = new_motor.get('specs', {}).get('max_thrust_g', 0) * motor_count
+                auw_kg = propulsion_dict.get('calculations', {}).get('estimated_auw_kg', 2.0)
+                if auw_kg > 0:
+                    propulsion_dict['thrust_to_weight'] = round(new_thrust_g / (auw_kg * 1000), 2)
+                    propulsion_dict['total_thrust_n'] = new_thrust_g * 9.81 / 1000
+                result_state['propulsion_design'] = propulsion_dict
+                patched = True
+                logger.info(f"Optimizer applied motor swap: {new_motor.get('model')}")
+            
+            power_dict = None
+            new_cell_count = swaps.get('new_cell_count')
+            if new_cell_count:
+                power = state.get("power_design", {})
+                if hasattr(power, '__dict__') and not isinstance(power, dict):
+                    power_dict = asdict(power)
+                else:
+                    power_dict = dict(power) if isinstance(power, dict) else {}
+                calcs = dict(power_dict.get('calculations', {}))
+                calcs['cell_count'] = new_cell_count
+                power_dict['calculations'] = calcs
+                result_state['power_design'] = power_dict
+                patched = True
+                logger.info(f"Optimizer applied cell count correction: {new_cell_count}S")
+                
+            new_battery_capacity_mah = swaps.get('new_battery_capacity_mah')
+            if new_battery_capacity_mah:
+                if power_dict is None:
+                    power = state.get("power_design", {})
+                    if hasattr(power, '__dict__') and not isinstance(power, dict):
+                        power_dict = asdict(power)
+                    else:
+                        power_dict = dict(power) if isinstance(power, dict) else {}
+                
+                power_dict['total_capacity_mah'] = new_battery_capacity_mah
+                
+                # Recalculate total energy
+                cell_count = power_dict.get('calculations', {}).get('cell_count', 6)
+                nominal_voltage = cell_count * 3.7
+                power_dict['total_energy_wh'] = round((new_battery_capacity_mah / 1000) * nominal_voltage, 1)
+                
+                # Update battery object specs and model
+                battery = power_dict.get('battery', {})
+                if isinstance(battery, dict) and battery:
+                    battery_specs = dict(battery.get('specs', {}))
+                    battery_specs['capacity_mah'] = new_battery_capacity_mah
+                    battery['specs'] = battery_specs
+                    battery['model'] = f"{cell_count}S {new_battery_capacity_mah}mAh LiPo"
+                    power_dict['battery'] = battery
+                    
+                result_state['power_design'] = power_dict
+                patched = True
+                logger.info(f"Optimizer applied battery capacity increase: {new_battery_capacity_mah}mAh")
+            
+            if patched:
+                logger.info("Optimizer patched design state successfully")
+        
+        return result_state
     
     def _bom_generator_node(self, state: DroneDesignState) -> Dict[str, Any]:
         """Generate bill of materials"""

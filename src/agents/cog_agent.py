@@ -21,52 +21,46 @@ class CogAgent:
     def _get_motor_positions(self, config: str, wheelbase_mm: float, 
                             arm_length_mm: float) -> List[Tuple[float, float, float]]:
         """
-        Calculate motor positions based on configuration.
+        Calculate motor positions based on configuration (BUG-045).
         
         Returns:
             List of (x, y, z) positions in mm from geometric center
         """
         positions = []
+        config_lower = config.lower().replace("-", "_")
         
-        if 'quadcopter_x' in config:
-            # Motors at 45° angles
+        # Determine motor count
+        motor_count = 4
+        if 'hexacopter' in config_lower:
+            motor_count = 6
+        elif 'octocopter' in config_lower:
+            motor_count = 8
+        elif 'tricopter' in config_lower:
+            motor_count = 3
+            
+        # Coaxial Octocopter special handling (4 arms, 2 motors per arm)
+        if 'octocopter_coax' in config_lower:
             for i in range(4):
                 angle = math.radians(45 + 90 * i)
                 x = arm_length_mm * math.cos(angle)
                 y = arm_length_mm * math.sin(angle)
-                positions.append((x, y, 0))
-        
-        elif 'quadcopter_plus' in config:
-            # Motors at 0°, 90°, 180°, 270°
-            for i in range(4):
-                angle = math.radians(90 * i)
+                positions.append((x, y, 20.0))  # Top motor
+                positions.append((x, y, -20.0)) # Bottom motor
+        elif 'plus' in config_lower:
+            # Plus configuration (rotors aligned with x/y axes)
+            for i in range(motor_count):
+                angle = math.radians((360.0 / motor_count) * i)
                 x = arm_length_mm * math.cos(angle)
                 y = arm_length_mm * math.sin(angle)
-                positions.append((x, y, 0))
-        
-        elif 'hexacopter_x' in config:
-            # Motors at 60° intervals, rotated 30°
-            for i in range(6):
-                angle = math.radians(30 + 60 * i)
-                x = arm_length_mm * math.cos(angle)
-                y = arm_length_mm * math.sin(angle)
-                positions.append((x, y, 0))
-        
-        elif 'octocopter_x' in config:
-            # Motors at 45° intervals
-            for i in range(8):
-                angle = math.radians(22.5 + 45 * i)
-                x = arm_length_mm * math.cos(angle)
-                y = arm_length_mm * math.sin(angle)
-                positions.append((x, y, 0))
-        
+                positions.append((x, y, 0.0))
         else:
-            # Default to quad X
-            for i in range(4):
-                angle = math.radians(45 + 90 * i)
+            # X, H, or other configurations (rotors offset from axes)
+            offset = 180.0 / motor_count if motor_count > 0 else 45.0
+            for i in range(motor_count):
+                angle = math.radians(offset + (360.0 / motor_count) * i)
                 x = arm_length_mm * math.cos(angle)
                 y = arm_length_mm * math.sin(angle)
-                positions.append((x, y, 0))
+                positions.append((x, y, 0.0))
         
         return positions
     
@@ -389,6 +383,8 @@ class CogAgent:
             iyy_kg_m2=round(moi[1], 6),
             izz_kg_m2=round(moi[2], 6),
             total_mass_kg=round(total_mass_g / 1000, 3),
+            all_up_weight_kg=round(total_mass_g / 1000, 3),
+            cg_tolerance_mm=10.0,  # Explicitly set CG tolerance to 10mm (BUG-060)
             cg_within_tolerance=cg_check['within_tolerance'],
             calculations={
                 'component_count': len(components),

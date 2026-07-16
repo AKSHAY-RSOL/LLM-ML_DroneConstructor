@@ -6,8 +6,9 @@ Optimizes design for weight, cost, and performance.
 import json
 import logging
 import random
-from typing import Dict, Any, List, Tuple
+from typing import Dict, Any, List, Tuple, Optional
 from dataclasses import asdict
+from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
@@ -104,47 +105,56 @@ class OptimizerAgent:
         electronics = self._get_state_value('electronics_design', state, {})
         structural = self._get_state_value('structural_design', state, {})
         
-        # Propulsion costs
+        # Propulsion costs (BUG-037)
         motors = propulsion.get('motors', [])
         motor_count = propulsion.get('motor_count', 4)
-        for motor in motors:
-            price = motor.get('specs', {}).get('price_usd', 30)
-            total += price * motor_count
+        
+        def get_price(item, default):
+            if not item: return default
+            if 'price_usd' in item: return item['price_usd']
+            specs = item.get('specs', {})
+            if 'price_usd' in specs: return specs['price_usd']
+            price_obj = item.get('price', {})
+            if isinstance(price_obj, dict): return price_obj.get('usd', default)
+            return default
+
+        if motors:
+            total += get_price(motors[0], 30) * motor_count
         
         props = propulsion.get('propellers', [])
-        for prop in props:
-            total += prop.get('unit_price', 5) * (motor_count * 2)  # Include spares
+        if props:
+            # PROP database uses pair/unit pricing. Already scaled.
+            total += get_price(props[0], 5) * motor_count
         
         escs = propulsion.get('escs', [])
-        for esc in escs:
-            price = esc.get('specs', {}).get('price_usd', 20)
-            total += price * motor_count
+        if escs:
+            total += get_price(escs[0], 20) * motor_count
         
-        # Battery
+        # Battery (BUG-058 / BUG-051)
         battery = power.get('battery', {})
-        if isinstance(battery.get('price', {}), dict):
-            total += battery.get('price', {}).get('usd', 100)
-        else:
-            total += battery.get('price_usd', 100)
+        if battery:
+            total += get_price(battery, 100)
         
-        # Electronics
+        # Electronics (BUG-051 / BUG-058)
         fc = electronics.get('flight_controller', {})
-        if isinstance(fc.get('price', {}), dict):
-            total += fc.get('price', {}).get('usd', 100)
-        else:
-            total += fc.get('price_usd', 100)
+        if fc:
+            total += get_price(fc, 100)
         
-        gps = electronics.get('gps_module', {})
-        total += gps.get('price_usd', 50)
+        gps = electronics.get('gps_module', {}) or electronics.get('gps', {})
+        if gps:
+            total += get_price(gps, 50)
         
         receiver = electronics.get('receiver', {})
-        total += receiver.get('price_usd', 30)
+        if receiver:
+            total += get_price(receiver, 30)
         
-        telemetry = electronics.get('telemetry_system', {})
-        total += telemetry.get('price_usd', 50)
+        telemetry = electronics.get('telemetry_system', {}) or electronics.get('telemetry', {})
+        if telemetry:
+            total += get_price(telemetry, 50)
         
         pdb = electronics.get('pdb', {})
-        total += pdb.get('price_usd', 30)
+        if pdb:
+            total += get_price(pdb, 30)
         
         # Additional sensors
         sensors = electronics.get('additional_sensors', [])
@@ -293,6 +303,98 @@ class OptimizerAgent:
         
         return analysis
     
+    def _get_validation_dict(self, validation: Any) -> Dict:
+        """BUG-030: Safely convert validation to dict regardless of type."""
+        if isinstance(validation, dict):
+            return validation
+        if hasattr(validation, '__dict__'):
+            try:
+                return asdict(validation)
+            except Exception:
+                return validation.__dict__
+        return {}
+
+    def _build_component_swaps(self, state: Dict[str, Any],
+                               validation_dict: Dict) -> Dict[str, Any]:
+        """
+        BUG-015: Analyse validation failures and return concrete component swaps
+        that the workflow can apply directly to propulsion/power state.
+        
+        Returns a dict with optional keys:
+          - 'new_motor'      : replacement motor dict (same format as propulsion motors list)
+          - 'new_battery'    : replacement battery dict (same format as power battery)
+          - 'new_cell_count' : int — requested cell count for power agent re-run
+          - 'notes'          : list of strings describing changes
+        """
+        swaps: Dict[str, Any] = {'notes': []}
+        issues = validation_dict.get('critical_issues', []) + validation_dict.get('physics_issues', [])
+        warnings = validation_dict.get('warnings', [])
+        all_text = ' '.join(issues + warnings).lower()
+
+        propulsion = self._get_state_value('propulsion_design', state, {})
+        power = self._get_state_value('power_design', state, {})
+        motors = propulsion.get('motors', [{}])
+        current_motor = motors[0] if motors else {}
+        current_tw = propulsion.get('thrust_to_weight', 0)
+        auw_kg = (self._get_state_value('cog_analysis', state, {})
+                  .get('all_up_weight_kg', 0) or
+                  propulsion.get('calculations', {}).get('estimated_auw_kg', 2.0))
+
+        # --- Fix 1: Low thrust-to-weight ---
+        if 'thrust' in all_text and ('insufficient' in all_text or 'low' in all_text
+                                     or current_tw < 1.5):
+            # Load motor database and find next stronger motor
+            try:
+                db_root = Path(__file__).parent.parent.parent / 'databases'
+                import json as _json
+                with open(db_root / 'motors' / 'motor_database.json') as f:
+                    motors_db = _json.load(f)
+                motor_count = propulsion.get('motor_count', 4)
+                # Target: achieve T/W = 2.0 at min
+                required_thrust_per_motor_g = auw_kg * 9.81 * 2.0 / motor_count / 9.81 * 1000
+                all_motors = sorted(
+                    motors_db.get('motors', []),
+                    key=lambda m: m.get('max_thrust_g', 0)
+                )
+                # Find lightest motor that meets requirement + 15% headroom
+                for candidate in all_motors:
+                    if candidate.get('max_thrust_g', 0) >= required_thrust_per_motor_g * 1.15:
+                        if candidate.get('model') != current_motor.get('model'):  # Different from current
+                            swaps['new_motor'] = candidate
+                            swaps['notes'].append(
+                                f"Motor upgraded: {current_motor.get('model','?')} → "
+                                f"{candidate.get('model','?')} (thrust "
+                                f"{candidate.get('max_thrust_g',0)}g/motor)"
+                            )
+                            break
+            except Exception as e:
+                logger.warning(f"Could not load motor database for swap: {e}")
+
+        # --- Fix 2: Battery cell count mismatch ---
+        if 'cell' in all_text and ('exceed' in all_text or 'mismatch' in all_text):
+            motor_cells_max = current_motor.get('specs', {}).get('cell_count_max', 0)
+            if motor_cells_max == 0:
+                cells = current_motor.get('battery_cells') or current_motor.get('specs', {}).get('battery_cells', [])
+                if cells:
+                    motor_cells_max = max(cells)
+            current_cells = power.get('calculations', {}).get('cell_count', 0)
+            if motor_cells_max > 0 and current_cells > motor_cells_max:
+                swaps['new_cell_count'] = motor_cells_max
+                swaps['notes'].append(
+                    f"Cell count reduced {current_cells}S → {motor_cells_max}S to match motor rating"
+                )
+
+        # --- Fix 3: Flight time too short ---
+        if 'flight time' in all_text or 'endurance' in all_text:
+            current_cells = power.get('calculations', {}).get('cell_count', 6)
+            current_cap = power.get('total_capacity_mah', 0)
+            swaps['new_battery_capacity_mah'] = int(current_cap * 1.25)  # +25%
+            swaps['notes'].append(
+                f"Battery capacity increased {current_cap:.0f} → {current_cap*1.25:.0f}mAh (+25%)"
+            )
+
+        return swaps
+
     def optimize(self, state: Dict[str, Any], requirements: Any, validation: Any) -> Any:
         """
         Optimize the design.
@@ -300,17 +402,23 @@ class OptimizerAgent:
         Args:
             state: Complete workflow state
             requirements: Mission requirements
-            validation: Validation result
+            validation: Validation result (may be dict or ValidationResult dataclass)
             
         Returns:
             OptimizationResult dataclass
         """
         logger.info("Starting design optimization")
         
+        # BUG-030: Safely handle validation regardless of dict vs dataclass
+        validation_dict = self._get_validation_dict(validation)
+        
         # Calculate current metrics
         current_weight = self._calculate_total_weight(state)
         current_cost = self._calculate_total_cost(state)
         current_performance = self._calculate_performance_score(state)
+        
+        # BUG-015: Build concrete component swaps from validation failures
+        component_swaps = self._build_component_swaps(state, validation_dict)
         
         # Generate Pareto solutions
         pareto_solutions = self._generate_pareto_solutions(state)
@@ -328,6 +436,13 @@ class OptimizerAgent:
         if hasattr(power_design, '__dict__') and not isinstance(power_design, dict):
             power_design = asdict(power_design)
         
+        all_notes = [
+            f"Current design scores {current_performance:.0f}/100",
+            f"Total estimated cost: ${current_cost:.0f}",
+            f"All-up weight: {current_weight:.2f}kg",
+            "See Pareto solutions for alternative trade-offs"
+        ] + component_swaps.get('notes', [])
+        
         result = OptimizationResult(
             optimized_weight_kg=current_weight,
             optimized_cost=current_cost,
@@ -336,13 +451,11 @@ class OptimizerAgent:
             pareto_solutions=pareto_solutions,
             selected_solution=selected_solution,
             sensitivity_analysis=sensitivity,
-            optimization_notes=[
-                f"Current design scores {current_performance:.0f}/100",
-                f"Total estimated cost: ${current_cost:.0f}",
-                f"All-up weight: {current_weight:.2f}kg",
-                "See Pareto solutions for alternative trade-offs"
-            ]
+            optimization_notes=all_notes
         )
+        
+        # Attach component_swaps so workflow can apply them back to state (BUG-015)
+        result.component_swaps = component_swaps
         
         logger.info("Design optimization completed")
         return result

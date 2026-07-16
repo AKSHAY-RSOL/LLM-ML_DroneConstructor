@@ -226,31 +226,44 @@ class MissionAnalyzerAgent:
         else:
             configuration = config_str
         
+        # Helper to get value falling back to default if value is None
+        def get_val(key, default):
+            val = parsed.get(key)
+            return default if val is None else val
+
+        # Map use_case from use_cases if use_case is missing
+        use_cases = get_val("use_cases", [])
+        use_case = get_val("use_case", None)
+        if use_case is None and use_cases:
+            use_case = use_cases[0]
+        if use_case is None:
+            use_case = "general"
+
         # Create requirements object
         requirements = MissionRequirements(
             drone_type=drone_type,
             configuration=configuration,
-            use_case=parsed.get("use_case", "general"),
-            payload_mass_kg=parsed.get("payload_capacity_kg", 0.5),
-            payload_type=parsed.get("payload_type", "camera"),
-            endurance_min=parsed.get("flight_time_minutes", 25),
-            range_km=parsed.get("range_km", 5.0),
-            max_speed_ms=parsed.get("max_speed_ms", 15.0),
-            cruise_speed_ms=parsed.get("cruise_speed_ms", 10.0),
-            max_altitude_m=parsed.get("max_altitude_m", 120),
-            wind_resistance_ms=parsed.get("wind_resistance_ms", 10.0),
-            temp_min_c=parsed.get("operating_temperature_min_c", 0),
-            temp_max_c=parsed.get("operating_temperature_max_c", 45),
-            obstacle_avoidance=parsed.get("obstacle_avoidance", False),
-            return_to_home=parsed.get("return_to_home", True),
-            waypoint_navigation=parsed.get("waypoint_navigation", True),
-            geofencing=parsed.get("geofencing", True),
-            beyond_vlos=parsed.get("bvlos", False),
-            jurisdictions=parsed.get("jurisdictions", ["india_dgca"]),
-            max_cost=parsed.get("budget_usd", 100000) or 100000,
-            currency=parsed.get("currency", "INR"),
+            use_case=use_case,
+            payload_mass_kg=get_val("payload_capacity_kg", 0.5),
+            payload_type=get_val("payload_type", "camera"),
+            endurance_min=get_val("flight_time_minutes", 25),
+            range_km=get_val("range_km", 5.0),
+            max_speed_ms=get_val("max_speed_ms", 15.0),
+            cruise_speed_ms=get_val("cruise_speed_ms", 10.0),
+            max_altitude_m=get_val("max_altitude_m", 120),
+            wind_resistance_ms=get_val("wind_resistance_ms", 10.0),
+            temp_min_c=get_val("operating_temperature_min_c", 0),
+            temp_max_c=get_val("operating_temperature_max_c", 45),
+            obstacle_avoidance=get_val("obstacle_avoidance", False),
+            return_to_home=get_val("return_to_home", True),
+            waypoint_navigation=get_val("waypoint_navigation", True),
+            geofencing=get_val("geofencing", True),
+            beyond_vlos=get_val("bvlos", False),
+            jurisdictions=get_val("jurisdictions", ["india_dgca"]),
+            max_cost=get_val("budget_usd", None) if get_val("budget_usd", None) is not None else get_val("max_cost", 100000.0),
+            currency=get_val("currency", "USD" if get_val("budget_usd", None) is not None else "INR"),
             cad_detail=cad_detail,
-            assumptions=parsed.get("assumptions", [])
+            assumptions=get_val("assumptions", [])
         )
         
         return requirements
@@ -260,15 +273,50 @@ class MissionAnalyzerAgent:
         mission: str,
         cad_detail: str
     ) -> MissionRequirements:
-        """Return default requirements when parsing fails"""
-        logger.warning("Using default requirements due to parsing failure")
+        """Return default requirements when parsing fails with regex extraction fallback"""
+        logger.warning("Using default requirements with regex fallback extraction due to parsing failure")
+        
+        # Regex search fallbacks
+        payload = 0.5
+        payload_match = re.search(r'(\d+(?:\.\d+)?)\s*k?g', mission.lower())
+        if payload_match:
+            try:
+                payload = float(payload_match.group(1))
+            except ValueError:
+                pass
+                
+        endurance = 25
+        endurance_match = re.search(r'(\d+)\s*(?:min|minute)', mission.lower())
+        if endurance_match:
+            try:
+                endurance = int(endurance_match.group(1))
+            except ValueError:
+                pass
+                
+        budget = 100000.0
+        currency = "INR"
+        budget_match = re.search(r'(?:\$|usd)\s*(\d+(?:,\d+)?)', mission.lower())
+        if budget_match:
+            try:
+                budget = float(budget_match.group(1).replace(',', ''))
+                currency = "USD"
+            except ValueError:
+                pass
+        else:
+            budget_match_inr = re.search(r'(?:rs|inr|₹)\s*(\d+(?:,\d+)?)', mission.lower())
+            if budget_match_inr:
+                try:
+                    budget = float(budget_match_inr.group(1).replace(',', ''))
+                    currency = "INR"
+                except ValueError:
+                    pass
         
         return MissionRequirements(
             drone_type=DroneType.MULTIROTOR,
             configuration="quadcopter_x",
             use_case="general",
-            payload_mass_kg=0.5,
-            endurance_min=25,
+            payload_mass_kg=payload,
+            endurance_min=endurance,
             range_km=5.0,
             max_speed_ms=15.0,
             cruise_speed_ms=10.0,
@@ -282,10 +330,10 @@ class MissionAnalyzerAgent:
             geofencing=True,
             beyond_vlos=False,
             jurisdictions=["india_dgca"],
-            max_cost=100000,
-            currency="INR",
+            max_cost=budget,
+            currency=currency,
             cad_detail=cad_detail,
-            assumptions=["Using default values due to parsing failure"]
+            assumptions=["Using default values with regex extraction due to parsing failure"]
         )
     
     def validate_requirements(self, requirements: MissionRequirements) -> Dict[str, Any]:

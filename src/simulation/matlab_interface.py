@@ -335,14 +335,22 @@ fprintf('Simulink initialization complete!\\n');
     % Linear acceleration
     acc = F_total / drone.mass;
     
-    % Moments from motor thrusts
+    % Moments from motor thrusts (BUG-063)
     L = drone.arm_length;
+    kQ = 0.01;  % Torque coefficient
     if length(u) == 4  % Quadcopter X
         L_eff = L * cos(pi/4);
         roll_moment = L_eff * (motor_thrusts(1) + motor_thrusts(2) - motor_thrusts(3) - motor_thrusts(4));
         pitch_moment = L_eff * (motor_thrusts(1) + motor_thrusts(4) - motor_thrusts(2) - motor_thrusts(3));
-        kQ = 0.01;  % Torque coefficient
         yaw_moment = kQ * (-motor_thrusts(1) + motor_thrusts(2) - motor_thrusts(3) + motor_thrusts(4));
+    elseif length(u) == 6  % Hexacopter X
+        roll_moment = L * (0.5 * motor_thrusts(1) - 0.5 * motor_thrusts(2) - motor_thrusts(3) - 0.5 * motor_thrusts(4) + 0.5 * motor_thrusts(5) + motor_thrusts(6));
+        pitch_moment = L * (motor_thrusts(1) + motor_thrusts(2) - motor_thrusts(4) - motor_thrusts(5));
+        yaw_moment = kQ * (-motor_thrusts(1) + motor_thrusts(2) - motor_thrusts(3) + motor_thrusts(4) - motor_thrusts(5) + motor_thrusts(6));
+    elseif length(u) == 8  % Octocopter X
+        roll_moment = L * (0.38 * motor_thrusts(1) - 0.38 * motor_thrusts(2) - 0.92 * motor_thrusts(3) - 0.92 * motor_thrusts(4) - 0.38 * motor_thrusts(5) + 0.38 * motor_thrusts(6) + 0.92 * motor_thrusts(7) + 0.92 * motor_thrusts(8));
+        pitch_moment = L * (0.92 * motor_thrusts(1) + 0.92 * motor_thrusts(2) + 0.38 * motor_thrusts(3) - 0.38 * motor_thrusts(4) - 0.92 * motor_thrusts(5) - 0.92 * motor_thrusts(6) - 0.38 * motor_thrusts(7) + 0.38 * motor_thrusts(8));
+        yaw_moment = kQ * (-motor_thrusts(1) + motor_thrusts(2) - motor_thrusts(3) + motor_thrusts(4) - motor_thrusts(5) + motor_thrusts(6) - motor_thrusts(7) + motor_thrusts(8));
     else
         % Generic
         roll_moment = 0;

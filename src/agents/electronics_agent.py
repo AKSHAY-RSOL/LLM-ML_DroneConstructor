@@ -16,9 +16,11 @@ class ElectronicsAgent:
     
     def __init__(self, llm_provider: Any):
         self.llm = llm_provider
-        self.fc_db = self._load_database("databases/flight_controllers/flight_controller_database.json")
-        self.gps_db = self._load_database("databases/gps/gps_database.json")
-        self.comm_db = self._load_database("databases/communication/communication_database.json")
+        from pathlib import Path
+        db_root = Path(__file__).parent.parent.parent / "databases"
+        self.fc_db = self._load_database(db_root / "flight_controllers" / "flight_controller_database.json")
+        self.gps_db = self._load_database(db_root / "gps" / "gps_database.json")
+        self.comm_db = self._load_database(db_root / "communication" / "communication_database.json")
     
     def _load_database(self, path: str) -> Dict:
         try:
@@ -33,7 +35,6 @@ class ElectronicsAgent:
         fcs = self.fc_db.get('flight_controllers', [])
         
         needs_autonomy = requirements.get('waypoint_navigation', False)
-        needs_rtk = requirements.get('precision_landing', False)
         motor_count = self._get_motor_count(requirements.get('configuration', 'quadcopter_x'))
         budget = requirements.get('max_cost', 100000)
         
@@ -41,18 +42,18 @@ class ElectronicsAgent:
         for fc in fcs:
             specs = fc.get('specs', {})
             
-            # Check motor outputs
-            motor_outputs = specs.get('motor_outputs', 0)
+            # Check motor outputs (BUG-042: specs.pwm_outputs is the database key)
+            motor_outputs = specs.get('pwm_outputs', 0)
             if motor_outputs < motor_count:
                 continue
             
-            # Check autonomy support
-            firmware = fc.get('firmware_support', [])
+            # Check autonomy support (BUG-042: fc.firmware is the database key)
+            firmware = fc.get('firmware', [])
             if needs_autonomy and not any(f in firmware for f in ['ArduPilot', 'PX4']):
                 continue
             
-            # Check price
-            price = fc.get('price', {}).get('usd', 9999)
+            # Check price (BUG-042: fc.price_usd is the database key)
+            price = fc.get('price_usd', 9999)
             if price > budget * 0.05:  # FC should be <5% of budget
                 continue
             
@@ -63,11 +64,11 @@ class ElectronicsAgent:
             def score_fc(fc):
                 specs = fc.get('specs', {})
                 score = 0
-                score += specs.get('motor_outputs', 0) * 2
-                score += len(specs.get('uarts', [])) * 5
-                score += 20 if 'ArduPilot' in fc.get('firmware_support', []) else 0
-                score += 20 if 'PX4' in fc.get('firmware_support', []) else 0
-                score -= fc.get('price', {}).get('usd', 0) / 10
+                score += specs.get('pwm_outputs', 0) * 2
+                score += specs.get('uart_ports', 0) * 5
+                score += 20 if 'ArduPilot' in fc.get('firmware', []) else 0
+                score += 20 if 'PX4' in fc.get('firmware', []) else 0
+                score -= fc.get('price_usd', 0) / 10
                 return score
             
             suitable.sort(key=score_fc, reverse=True)
@@ -324,7 +325,7 @@ class ElectronicsAgent:
             'total_price_usd': 25
         }
     
-    def _select_pdb(self, motor_count: int, max_current: float) -> Dict:
+    def _select_pdb(self, max_current: float) -> Dict:
         """Select power distribution board"""
         if max_current < 60:
             return {
@@ -408,7 +409,7 @@ class ElectronicsAgent:
         else:
             max_current = 50
         motor_count = propulsion_dict.get('motor_count', 4)
-        pdb = self._select_pdb(motor_count, max_current)
+        pdb = self._select_pdb(max_current)
         
         # Calculate total weight and cost
         total_weight = 0
@@ -425,10 +426,12 @@ class ElectronicsAgent:
         for comp, name in components:
             if comp:
                 weight = comp.get('specs', {}).get('weight_g', 30)
-                if isinstance(comp.get('price', {}), dict):
-                    price = comp.get('price', {}).get('usd', 50)
-                else:
-                    price = comp.get('price_usd', 50)
+                # BUG-051: Check properly if 'price' contains nested 'usd', or use 'price_usd' flat key
+                price = 50
+                if 'price' in comp and isinstance(comp['price'], dict):
+                    price = comp['price'].get('usd', 50)
+                elif 'price_usd' in comp:
+                    price = comp['price_usd']
                 total_weight += weight
                 total_cost += price
         

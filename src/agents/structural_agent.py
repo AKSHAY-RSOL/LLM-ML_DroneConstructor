@@ -8,6 +8,7 @@ import logging
 import math
 from typing import Dict, Any, Optional, List
 from dataclasses import asdict
+from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
@@ -137,8 +138,9 @@ class StructuralAgent:
     
     def __init__(self, llm_provider: Any):
         self.llm = llm_provider
-        self.frames_db = self._load_database("databases/frames/frame_database.json")
-        self.materials_db = self._load_database("databases/materials/materials_database.json")
+        db_root = Path(__file__).parent.parent.parent / "databases"
+        self.frames_db = self._load_database(str(db_root / "frames" / "frame_database.json"))
+        self.materials_db = self._load_database(str(db_root / "materials" / "materials_database.json"))
     
     def _load_database(self, path: str) -> Dict:
         try:
@@ -327,6 +329,19 @@ class StructuralAgent:
         config = mission_req.get('configuration', 'quadcopter_x')
         payload_kg = mission_req.get('payload_mass_kg', 0)
         budget = mission_req.get('max_cost', 100000)
+        
+        # BUG-028: Route fixed-wing / VTOL away from rotary-wing frame logic
+        drone_type = mission_req.get('drone_type', 'multirotor')
+        dt_str = drone_type.value if hasattr(drone_type, 'value') else str(drone_type)
+        dt_str = dt_str.lower()
+        is_fixed_wing = ('fixed_wing' in dt_str or 'flying_wing' in config or
+                         config in ('conventional', 'flying_wing', 'canard', 'biplane', 'delta'))
+        is_vtol = ('vtol' in dt_str or config in ('quadplane', 'tailsitter', 'tiltrotor_quad',
+                                                    'tiltrotor_tri', 'lift_cruise'))
+        
+        if is_fixed_wing or is_vtol:
+            return self._design_fixed_wing_structure(mission_req, propulsion_dict, config)
+        
         motor_count = self._get_motor_count(config)
         
         # Get propeller size from propulsion design
@@ -344,6 +359,9 @@ class StructuralAgent:
             frame_weight = selected_frame.get('specs', {}).get('weight_g', 500)
             material = selected_frame.get('specs', {}).get('material', 'carbon_fiber')
             arm_od = selected_frame.get('specs', {}).get('arm_diameter_mm', 16)
+            # BUG-004: preserve database arm_wall — do NOT overwrite with a formula
+            arm_wall = selected_frame.get('specs', {}).get('arm_wall_thickness_mm',
+                                                            1.5 if arm_od <= 16 else 2.0)
             custom_required = False
         else:
             # Design custom frame
@@ -365,7 +383,7 @@ class StructuralAgent:
         
         # Calculate arm length
         arm_length = self._calculate_arm_length(wheelbase, config)
-        arm_wall = 1.5 if arm_od <= 16 else 2.0
+        # BUG-004: arm_wall is now set correctly above for both paths — do NOT re-assign here
         
         # Stress analysis
         thrust_per_motor_n = propulsion_dict.get('total_thrust_n', 50) / motor_count
@@ -401,6 +419,11 @@ class StructuralAgent:
         
         lg_height = max(80, prop_size * 25.4 / 3)  # At least 1/3 prop diameter
         
+        # Generate structural BOM
+        struct_bom = self._generate_structural_bom(
+            selected_frame, custom_required, wheelbase, motor_count, material
+        )
+        
         # Build structural design result
         from ..core.state import StructuralDesign
         
@@ -418,6 +441,8 @@ class StructuralAgent:
             landing_gear_type='fixed',
             landing_gear_material='aluminum',
             landing_gear_height_mm=round(lg_height, 0),
+            structural_bom=struct_bom,
+            frame_selection=selected_frame if selected_frame else {},
             calculations={
                 'min_wheelbase_mm': round(min_wheelbase, 0),
                 'moment_of_inertia_mm4': round(I, 2),
@@ -436,6 +461,79 @@ class StructuralAgent:
         
         logger.info("Structural design completed")
         return result
+    
+    def _design_fixed_wing_structure(self, mission_req: Dict, propulsion_dict: Dict,
+                                     config: str) -> Any:
+        """
+        BUG-028: Provide a fixed-wing/VTOL structural design instead of
+        assigning a multirotor frame to a fixed-wing aircraft.
+        """
+        from ..core.state import StructuralDesign
+        
+        payload_kg = mission_req.get('payload_mass_kg', 0)
+        
+        # Estimate wingspan/fuselage dimensions from payload class
+        if payload_kg < 0.5:
+            wingspan_mm = 900
+            fuselage_length_mm = 600
+            frame_weight_g = 200
+            material = 'epp_foam'
+        elif payload_kg < 2.0:
+            wingspan_mm = 1400
+            fuselage_length_mm = 900
+            frame_weight_g = 600
+            material = 'g10_fiberglass'
+        else:
+            wingspan_mm = 2000
+            fuselage_length_mm = 1200
+            frame_weight_g = 1500
+            material = 'carbon_fiber'
+        
+        # Safety factor for fixed-wing (lower dynamic loads than multirotor hover)
+        # Typical fixed-wing safety factor: 3-4 for airframe
+        safety_factor = 3.5
+        
+        fixed_wing_bom = [
+            {'item': f'Wing panels ({material})', 'category': 'airframe', 'quantity': 2,
+             'unit_price': 80, 'source': 'commercial'},
+            {'item': 'Fuselage', 'category': 'airframe', 'quantity': 1,
+             'unit_price': 120, 'source': 'commercial'},
+            {'item': 'Control surface servos', 'category': 'airframe', 'quantity': 4,
+             'unit_price': 15, 'source': 'commercial'},
+            {'item': 'Landing gear (skid/belly)', 'category': 'airframe', 'quantity': 1,
+             'unit_price': 20, 'source': 'commercial'},
+        ]
+        
+        logger.info(f"Fixed-wing/VTOL structural design: config={config}, wingspan={wingspan_mm}mm")
+        
+        return StructuralDesign(
+            frame_type=f'fixed_wing_{config}',
+            frame_material=material,
+            frame_weight_g=frame_weight_g,
+            arm_length_mm=wingspan_mm / 2,  # Half-wingspan as 'arm' length
+            arm_diameter_mm=0,  # N/A for fixed-wing
+            arm_wall_thickness_mm=0,
+            wheelbase_mm=wingspan_mm,
+            max_bending_stress_mpa=0,  # Requires aerodynamic load analysis
+            safety_factor=safety_factor,
+            natural_frequency_hz=0,
+            landing_gear_type='belly_skid',
+            landing_gear_material='composite',
+            landing_gear_height_mm=50,
+            structural_bom=fixed_wing_bom,
+            frame_selection={},
+            calculations={
+                'wingspan_mm': wingspan_mm,
+                'fuselage_length_mm': fuselage_length_mm,
+                'frame_type': 'fixed_wing',
+                'custom_required': True,
+            },
+            justifications=[
+                f'Fixed-wing/VTOL structure: wingspan {wingspan_mm}mm, fuselage {fuselage_length_mm}mm',
+                f'Material: {material} selected for airframe requirements',
+                f'Safety factor {safety_factor} applied (fixed-wing aerodynamic loading standard)',
+            ]
+        )
     
     def _generate_structural_bom(self, selected_frame: Optional[Dict], 
                                  custom: bool, wheelbase: float,

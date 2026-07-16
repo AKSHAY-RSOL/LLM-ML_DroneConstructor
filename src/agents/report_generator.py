@@ -20,15 +20,27 @@ class ReportGenerator:
         self.report_sections = []
     
     def _to_dict(self, obj):
-        """Convert dataclass to dict safely"""
+        """Convert dataclass to dict safely and recursively sanitize enums (BUG-069)"""
         if obj is None:
             return {}
-        if isinstance(obj, dict):
-            return obj
+            
+        def sanitize(v):
+            if hasattr(v, 'value'):
+                return v.value
+            if isinstance(v, dict):
+                return {k2: sanitize(v2) for k2, v2 in v.items()}
+            if isinstance(v, list):
+                return [sanitize(v2) for v2 in v]
+            if hasattr(v, '__dataclass_fields__'):
+                return sanitize(asdict(v))
+            return v
+
         if hasattr(obj, '__dataclass_fields__'):
-            return asdict(obj)
+            return sanitize(asdict(obj))
+        if isinstance(obj, dict):
+            return sanitize(obj)
         if hasattr(obj, '__dict__'):
-            return obj.__dict__
+            return sanitize(obj.__dict__)
         return {}
     
     def generate_full_report(self, state: Dict[str, Any]) -> str:
@@ -86,6 +98,19 @@ class ReportGenerator:
         cog = self._to_dict(state.get('cog_analysis', {}))
         validation = self._to_dict(state.get('validation_result', {}))
         
+        # Format drone configuration/type enums (BUG-069)
+        config = mission_req.get('configuration', 'N/A')
+        if hasattr(config, 'value'):
+            config_str = config.value
+        else:
+            config_str = str(config)
+            
+        drone_type = mission_req.get('drone_type', 'multirotor')
+        if hasattr(drone_type, 'value'):
+            drone_type_str = drone_type.value
+        else:
+            drone_type_str = str(drone_type)
+
         auw = cog.get('total_mass_kg', 0) or propulsion.get('calculations', {}).get('estimated_auw_kg', 2.0)
         
         return f"""## 1. Executive Summary
@@ -99,7 +124,7 @@ All component selections are based on physics calculations, not arbitrary choice
 
 | Parameter | Value | Unit |
 |-----------|-------|------|
-| Configuration | {mission_req.get('configuration', 'N/A')} | - |
+| Configuration | {config_str} | - |
 | Motor Count | {propulsion.get('motor_count', 'N/A')} | units |
 | All-Up Weight (AUW) | {auw:.2f} | kg |
 | Total Thrust | {propulsion.get('total_thrust_n', 0):.2f} | N |
@@ -162,20 +187,27 @@ All component selections are based on physics calculations, not arbitrary choice
         hover_throttle = propulsion.get('hover_throttle_percent', 50)
         twratio = propulsion.get('thrust_to_weight', 2.0)
         
-        # Get motor specs
+        # Get values (BUG-059: read cell count from power calculations)
+        power = self._to_dict(state.get('power_design', {}))
+        cell_count = power.get('calculations', {}).get('cell_count', propulsion.get('calculations', {}).get('cell_count', 6))
+        
+        # Get motor specs (BUG-057: use brand fallback)
         motors = propulsion.get('motors', [{}])
         motor = motors[0] if motors else {}
-        motor_kv = motor.get('kv', 2300)
-        motor_max_thrust = motor.get('max_thrust_g', 500)
-        motor_weight = motor.get('weight_g', 30)
-        motor_max_current = motor.get('max_current_a', 30)
-        motor_price = motor.get('price_inr', 2000)
+        motor_kv = motor.get('specs', {}).get('kv', motor.get('kv', 2300))
+        motor_max_thrust = motor.get('specs', {}).get('max_thrust_g', motor.get('max_thrust_g', 500))
+        motor_weight = motor.get('specs', {}).get('weight_g', motor.get('weight_g', 30))
+        motor_max_current = motor.get('specs', {}).get('max_current_a', motor.get('max_current_a', 30))
+        
+        # Format brand/manufacturer safely
+        motor_brand = motor.get('brand', motor.get('manufacturer', 'Generic'))
+        motor_price = motor.get('price_inr', motor.get('price_usd', 0) * 95)
         
         # Get propeller specs
         props = propulsion.get('propellers', [{}])
         prop = props[0] if props else {}
-        prop_diameter = prop.get('diameter_in', 5)
-        prop_pitch = prop.get('pitch_in', 4)
+        prop_diameter = prop.get('diameter_in', prop.get('size_inch', 5))
+        prop_pitch = prop.get('pitch_in', prop.get('pitch_inch', 4))
         prop_blades = prop.get('blades', 3)
         
         # Calculate values
@@ -183,14 +215,23 @@ All component selections are based on physics calculations, not arbitrary choice
         weight_n = estimated_auw * 9.81
         
         # Required thrust per motor
-        required_thrust_per_motor = (weight_n / motor_count) * 2  # For 2:1 T/W
+        required_thrust_per_motor = (weight_n / motor_count) * twratio
         required_thrust_per_motor_g = required_thrust_per_motor / 9.81 * 1000
+        
+        # Dynamic comparison and status (BUG-044 / BUG-045)
+        thrust_status = "✅" if motor_max_thrust >= required_thrust_per_motor_g else "⚠️"
+        thrust_symbol = ">=" if motor_max_thrust >= required_thrust_per_motor_g else "<"
+        
+        # Configuration formatting
+        config_str = mission_req.get('configuration', 'quadcopter_x')
+        if hasattr(config_str, 'value'):
+            config_str = config_str.value
         
         return f"""## 3. Propulsion System Design Justification
 
 ### 3.1 Motor Count Selection: {motor_count} Motors
 
-**Justification:** A {mission_req.get('configuration', 'hexacopter')} configuration was selected because:
+**Justification:** A {config_str} configuration was selected because:
 
 1. **Redundancy:** With {motor_count} motors, the drone can potentially survive a single motor failure
 2. **Thrust Distribution:** Load is spread across more motors, reducing individual motor stress
@@ -202,34 +243,34 @@ All component selections are based on physics calculations, not arbitrary choice
 
 **Given:**
 - Estimated All-Up Weight (AUW) = {estimated_auw:.2f} kg
-- Required Thrust-to-Weight Ratio = 2.0 (minimum for agile flight)
+- Required Thrust-to-Weight Ratio = {twratio:.1f}
 - Motor Count = {motor_count}
 
 **Calculation:**
 
 $$\\text{{Total Weight Force}} = AUW \\times g = {estimated_auw:.2f} \\times 9.81 = {weight_n:.2f} \\text{{ N}}$$
 
-$$\\text{{Required Total Thrust}} = T/W \\times \\text{{Weight}} = 2.0 \\times {weight_n:.2f} = {weight_n * 2:.2f} \\text{{ N}}$$
+$$\\text{{Required Total Thrust}} = T/W \\times \\text{{Weight}} = {twratio:.1f} \\times {weight_n:.2f} = {weight_n * twratio:.2f} \\text{{ N}}$$
 
-$$\\text{{Thrust per Motor}} = \\frac{{\\text{{Total Thrust}}}}{{\\text{{Motor Count}}}} = \\frac{{{weight_n * 2:.2f}}}{{{motor_count}}} = {weight_n * 2 / motor_count:.2f} \\text{{ N}} = {required_thrust_per_motor_g:.0f} \\text{{ g}}$$
+$$\\text{{Thrust per Motor}} = \\frac{{\\text{{Total Thrust}}}}{{\\text{{Motor Count}}}} = \\frac{{{weight_n * twratio:.2f}}}{{{motor_count}}} = {weight_n * twratio / motor_count:.2f} \\text{{ N}} = {required_thrust_per_motor_g:.0f} \\text{{ g}}$$
 
 #### 3.2.2 Selected Motor Specifications
 
 | Parameter | Value | Justification |
 |-----------|-------|---------------|
-| Model | {motor.get('manufacturer', 'N/A')} {motor.get('model', 'N/A')} | Matches thrust requirements |
-| KV Rating | {motor_kv} KV | Optimized for {propulsion.get('calculations', {}).get('cell_count', 6)}S battery |
-| Max Thrust | {motor_max_thrust} g | > {required_thrust_per_motor_g:.0f} g required ✅ |
+| Model | {motor_brand} {motor.get('model', 'N/A')} | Matches thrust requirements |
+| KV Rating | {motor_kv} KV | Optimized for {cell_count}S battery |
+| Max Thrust | {motor_max_thrust} g | {thrust_symbol} {required_thrust_per_motor_g:.0f} g required {thrust_status} |
 | Weight | {motor_weight} g | Lightweight for efficiency |
 | Max Current | {motor_max_current} A | Within ESC rating |
-| Price | ₹{motor_price} | Within budget constraints |
+| Price | ₹{motor_price:.0f} | Within budget constraints |
 
 #### 3.2.3 Motor Selection Criteria vs Alternatives
 
 **Why this motor over alternatives:**
 
-1. **Thrust Margin:** {motor_max_thrust} g > {required_thrust_per_motor_g:.0f} g (required) → {(motor_max_thrust / required_thrust_per_motor_g * 100 - 100):.0f}% margin
-2. **Efficiency:** {motor.get('efficiency_g_per_w', 5)} g/W at hover
+1. **Thrust Margin:** {motor_max_thrust} g {thrust_symbol} {required_thrust_per_motor_g:.0f} g (required) → {(motor_max_thrust / max(required_thrust_per_motor_g, 1.0) * 100 - 100):.0f}% margin
+2. **Efficiency:** {motor.get('specs', {}).get('efficiency_g_per_w', 5)} g/W at hover
 3. **Availability:** {motor.get('availability', 'in_stock')}
 4. **Price-Performance:** Best thrust/₹ ratio in this category
 
@@ -607,28 +648,37 @@ $$t_{{flight}} = \\frac{{C_{{usable}}}}{{I_{{hover}}}} \\times 60 = \\frac{{{cap
         calcs = electronics.get('calculations', {})
         
         fc = electronics.get('flight_controller', {})
-        gps = electronics.get('gps', {})
+        # BUG-056: Read correct GPS module key
+        gps = electronics.get('gps_module', {}) or electronics.get('gps', {})
         receiver = electronics.get('receiver', {})
         escs = propulsion.get('escs', [{}])
         esc = escs[0] if escs else {}
         
         motor_count = propulsion.get('motor_count', 4)
         
+        # Safe extraction for flight controller firmware (BUG-042)
+        fc_firmware = fc.get('firmware', fc.get('firmware_support', ['ArduPilot']))
+        if isinstance(fc_firmware, str):
+            fc_firmware = [fc_firmware]
+            
+        fc_brand = fc.get('brand', fc.get('manufacturer', 'Generic'))
+        gps_brand = gps.get('brand', gps.get('manufacturer', 'Generic'))
+        
         return f"""## 7. Electronics Design Justification
 
 ### 7.1 Flight Controller Selection
 
-**Selected:** {fc.get('brand', 'N/A')} {fc.get('model', 'N/A')}
+**Selected:** {fc_brand} {fc.get('model', 'N/A')}
 
 #### 7.1.1 Selection Criteria
 
 | Requirement | Needed | Selected FC | Status |
 |-------------|--------|-------------|--------|
-| Motor Outputs | {motor_count} | {fc.get('specs', {}).get('motor_outputs', 8)} | ✅ |
+| Motor Outputs | {motor_count} | {fc.get('specs', {}).get('pwm_outputs', fc.get('specs', {}).get('motor_outputs', 8))} | ✅ |
 | Processor | High performance | {fc.get('specs', {}).get('processor', 'STM32')} | ✅ |
 | IMU | Precision required | {fc.get('specs', {}).get('imu', 'Dual IMU')} | ✅ |
-| UART Ports | ≥4 for peripherals | {fc.get('specs', {}).get('uarts', 6)} | ✅ |
-| Firmware Support | ArduPilot/PX4 | {', '.join(fc.get('firmware_support', ['ArduPilot']))} | ✅ |
+| UART Ports | ≥4 for peripherals | {fc.get('specs', {}).get('uart_ports', fc.get('specs', {}).get('uarts', 6))} | ✅ |
+| Firmware Support | ArduPilot/PX4 | {', '.join(fc_firmware)} | ✅ |
 
 #### 7.1.2 Why This Flight Controller Over Alternatives
 
@@ -638,7 +688,7 @@ $$t_{{flight}} = \\frac{{C_{{usable}}}}{{I_{{hover}}}} \\times 60 = \\frac{{{cap
 
 ### 7.2 GPS Selection
 
-**Selected:** {gps.get('brand', 'N/A')} {gps.get('model', 'N/A')}
+**Selected:** {gps_brand} {gps.get('model', 'N/A')}
 
 | Feature | Value | Purpose |
 |---------|-------|---------|
@@ -801,9 +851,9 @@ Where:
 
 | Axis | P | I | D | Notes |
 |------|---|---|---|-------|
-| Roll | {pids.get('roll', {}).get('p', 0)} | {pids.get('roll', {}).get('i', 0)} | {pids.get('roll', {}).get('d', 0)} | Scaled for {auw:.1f}kg |
-| Pitch | {pids.get('pitch', {}).get('p', 0)} | {pids.get('pitch', {}).get('i', 0)} | {pids.get('pitch', {}).get('d', 0)} | Scaled for {auw:.1f}kg |
-| Yaw | {pids.get('yaw', {}).get('p', 0)} | {pids.get('yaw', {}).get('i', 0)} | - | Higher for yaw authority |
+| Roll | {pids.get('roll', {}).get('P', pids.get('roll', {}).get('p', 0))} | {pids.get('roll', {}).get('I', pids.get('roll', {}).get('i', 0))} | {pids.get('roll', {}).get('D', pids.get('roll', {}).get('d', 0))} | Scaled for {auw:.1f}kg |
+| Pitch | {pids.get('pitch', {}).get('P', pids.get('pitch', {}).get('p', 0))} | {pids.get('pitch', {}).get('I', pids.get('pitch', {}).get('i', 0))} | {pids.get('pitch', {}).get('D', pids.get('pitch', {}).get('d', 0))} | Scaled for {auw:.1f}kg |
+| Yaw | {pids.get('yaw', {}).get('P', pids.get('yaw', {}).get('p', 0))} | {pids.get('yaw', {}).get('I', pids.get('yaw', {}).get('i', 0))} | - | Higher for yaw authority |
 
 **Note:** These are starting values. Field tuning is required for optimal performance.
 
@@ -957,15 +1007,23 @@ A complete wiring diagram is available in: `output/wiring/wiring_diagram.svg`
                 categories[cat] = 0
             categories[cat] += item.get('total_price', 0)
         
+        # Handle currency conversion (BUG-050: 1 USD = 95 INR)
+        budget_currency = mission_req.get('currency', 'INR')
+        budget_usd = budget
+        if budget_currency == 'INR':
+            budget_usd = budget / 95.0
+            
+        is_within_budget = (total_cost <= budget_usd) if budget_usd > 0 else True
+        
         return f"""## 12. Cost Analysis
 
 ### 12.1 Budget Summary
 
 | Item | Value |
 |------|-------|
-| Total Budget | {budget} {mission_req.get('currency', 'INR')} |
+| Total Budget | {budget} {budget_currency} |
 | Estimated Cost | {total_cost} {currency} |
-| Budget Status | {'✅ Within budget' if total_cost <= budget or budget == 0 else '⚠️ Over budget'} |
+| Budget Status | {'✅ Within budget' if is_within_budget else '⚠️ Over budget'} |
 
 ### 12.2 Cost Breakdown by Category
 

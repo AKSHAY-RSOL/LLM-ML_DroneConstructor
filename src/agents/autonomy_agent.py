@@ -238,16 +238,9 @@ class AutonomyAgent:
         
         return missions
     
-    def design(self, requirements: Any, electronics: Any) -> Any:
+    def design(self, requirements: Any, electronics: Any, power: Any = None) -> Any:
         """
         Design autonomy system.
-        
-        Args:
-            requirements: Mission requirements
-            electronics: Electronics design
-            
-        Returns:
-            AutonomyDesign dataclass
         """
         logger.info("Starting autonomy system design")
         
@@ -261,6 +254,11 @@ class AutonomyAgent:
             electronics_dict = asdict(electronics)
         else:
             electronics_dict = electronics if isinstance(electronics, dict) else {}
+            
+        if power and hasattr(power, '__dict__') and not isinstance(power, dict):
+            power_dict = asdict(power)
+        else:
+            power_dict = power if isinstance(power, dict) else {}
         
         # Select firmware
         firmware = self._select_firmware(mission_req, electronics_dict)
@@ -272,8 +270,8 @@ class AutonomyAgent:
         # Design obstacle avoidance
         obstacle_avoidance = self._design_obstacle_avoidance(mission_req, electronics_dict)
         
-        # Design safety features
-        safety = self._design_safety_features(mission_req, {})
+        # Design safety features (BUG-047: pass power_dict)
+        safety = self._design_safety_features(mission_req, power_dict)
         
         # Get supported missions
         missions = self._get_supported_missions(firmware, mission_req)
@@ -293,8 +291,10 @@ class AutonomyAgent:
             return_to_home=safety['return_to_home']['enabled'],
             rth_altitude_m=safety['return_to_home']['altitude_m'],
             low_battery_rth_percent=safety['low_battery']['rth_percent'],
+            signal_loss_behavior=safety.get('signal_loss', {}).get('behavior', 'RTH'), # BUG-054
             geofencing_enabled=safety['geofencing']['enabled'],
             supported_missions=missions,
+            firmware=firmware, # BUG-046
             calculations={
                 'firmware': firmware,
                 'ground_station_software': ground_stations[0],

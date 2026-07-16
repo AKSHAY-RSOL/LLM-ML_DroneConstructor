@@ -35,17 +35,37 @@ class DocumentationAgent:
         
         motor_count = propulsion.get('motor_count', 4)
         
+        # Price and brand helper functions (BUG-057 / BUG-058)
+        def get_price(item, default):
+            if not item: return default
+            if 'price_usd' in item: return item['price_usd']
+            specs = item.get('specs', {})
+            if 'price_usd' in specs: return specs['price_usd']
+            price_obj = item.get('price', {})
+            if isinstance(price_obj, dict): return price_obj.get('usd', default)
+            if isinstance(price_obj, (int, float)): return price_obj
+            return default
+
+        def get_item_name(item, default_model):
+            if not item: return default_model
+            brand = item.get('brand', item.get('manufacturer', ''))
+            model = item.get('model', default_model)
+            if brand:
+                return f"{brand} {model}".strip()
+            return model
+
         # Motors
         motors = propulsion.get('motors', [])
         if motors:
             motor = motors[0]
+            unit_price = get_price(motor, 30)
             items.append({
                 'category': 'Propulsion',
-                'item': f"{motor.get('brand', '')} {motor.get('model', 'Motor')}",
+                'item': get_item_name(motor, 'Motor'),
                 'specification': f"{motor.get('specs', {}).get('kv', '')}KV",
                 'quantity': motor_count,
-                'unit_price': motor.get('specs', {}).get('price_usd', 30),
-                'total_price': motor.get('specs', {}).get('price_usd', 30) * motor_count,
+                'unit_price': unit_price,
+                'total_price': unit_price * motor_count,
                 'source': motor.get('id', ''),
                 'notes': ''
             })
@@ -55,13 +75,14 @@ class DocumentationAgent:
         if props:
             prop = props[0]
             qty = motor_count * 2  # Include spares
+            unit_price = get_price(prop, 5)
             items.append({
                 'category': 'Propulsion',
-                'item': f"{prop.get('brand', '')} Propeller",
+                'item': get_item_name(prop, 'Propeller'),
                 'specification': f"{prop.get('size_inch', '')}x{prop.get('pitch_inch', '')}",
                 'quantity': qty,
-                'unit_price': prop.get('unit_price', 5),
-                'total_price': prop.get('unit_price', 5) * qty,
+                'unit_price': unit_price,
+                'total_price': unit_price * qty,
                 'source': prop.get('id', ''),
                 'notes': 'Includes spare set'
             })
@@ -70,13 +91,14 @@ class DocumentationAgent:
         escs = propulsion.get('escs', [])
         if escs:
             esc = escs[0]
+            unit_price = get_price(esc, 20)
             items.append({
                 'category': 'Propulsion',
-                'item': f"{esc.get('brand', '')} {esc.get('model', 'ESC')}",
+                'item': get_item_name(esc, 'ESC'),
                 'specification': f"{esc.get('specs', {}).get('current_rating_a', '')}A",
                 'quantity': motor_count,
-                'unit_price': esc.get('specs', {}).get('price_usd', 20),
-                'total_price': esc.get('specs', {}).get('price_usd', 20) * motor_count,
+                'unit_price': unit_price,
+                'total_price': unit_price * motor_count,
                 'source': esc.get('id', ''),
                 'notes': ''
             })
@@ -85,15 +107,11 @@ class DocumentationAgent:
         battery = power.get('battery', {})
         if battery:
             specs = battery.get('specs', {})
-            price = battery.get('price', {})
-            if isinstance(price, dict):
-                unit_price = price.get('usd', 100)
-            else:
-                unit_price = 100
+            unit_price = get_price(battery, 100)
             
             items.append({
                 'category': 'Power',
-                'item': f"{battery.get('brand', '')} {battery.get('model', 'Battery')}",
+                'item': get_item_name(battery, 'Battery'),
                 'specification': f"{specs.get('cell_count', 6)}S {specs.get('capacity_mah', 5000)}mAh",
                 'quantity': 1,
                 'unit_price': unit_price,
@@ -105,15 +123,11 @@ class DocumentationAgent:
         # Flight Controller
         fc = electronics.get('flight_controller', {})
         if fc:
-            price = fc.get('price', {})
-            if isinstance(price, dict):
-                unit_price = price.get('usd', 100)
-            else:
-                unit_price = 100
+            unit_price = get_price(fc, 100)
             
             items.append({
                 'category': 'Electronics',
-                'item': f"{fc.get('brand', '')} {fc.get('model', 'FC')}",
+                'item': get_item_name(fc, 'FC'),
                 'specification': fc.get('specs', {}).get('processor', ''),
                 'quantity': 1,
                 'unit_price': unit_price,
@@ -123,15 +137,16 @@ class DocumentationAgent:
             })
         
         # GPS
-        gps = electronics.get('gps_module', {})
+        gps = electronics.get('gps_module', {}) or electronics.get('gps', {})
         if gps:
+            unit_price = get_price(gps, 50)
             items.append({
                 'category': 'Electronics',
-                'item': f"{gps.get('brand', '')} {gps.get('model', 'GPS')}",
+                'item': get_item_name(gps, 'GPS'),
                 'specification': gps.get('specs', {}).get('chipset', ''),
                 'quantity': 1,
-                'unit_price': gps.get('price_usd', 50),
-                'total_price': gps.get('price_usd', 50),
+                'unit_price': unit_price,
+                'total_price': unit_price,
                 'source': gps.get('id', ''),
                 'notes': ''
             })
@@ -139,27 +154,29 @@ class DocumentationAgent:
         # Receiver
         rx = electronics.get('receiver', {})
         if rx:
+            unit_price = get_price(rx, 30)
             items.append({
                 'category': 'Electronics',
-                'item': f"{rx.get('brand', '')} {rx.get('model', 'Receiver')}",
+                'item': get_item_name(rx, 'Receiver'),
                 'specification': rx.get('protocol', ''),
                 'quantity': 1,
-                'unit_price': rx.get('price_usd', 30),
-                'total_price': rx.get('price_usd', 30),
+                'unit_price': unit_price,
+                'total_price': unit_price,
                 'source': rx.get('id', ''),
                 'notes': ''
             })
         
         # Telemetry
-        telem = electronics.get('telemetry_system', {})
+        telem = electronics.get('telemetry_system', {}) or electronics.get('telemetry', {})
         if telem:
+            unit_price = get_price(telem, 50)
             items.append({
                 'category': 'Electronics',
-                'item': f"{telem.get('brand', '')} {telem.get('model', 'Telemetry')}",
+                'item': get_item_name(telem, 'Telemetry'),
                 'specification': f"{telem.get('specs', {}).get('frequency_mhz', '')}MHz",
                 'quantity': 1,
-                'unit_price': telem.get('price_usd', 50),
-                'total_price': telem.get('price_usd', 50),
+                'unit_price': unit_price,
+                'total_price': unit_price,
                 'source': telem.get('id', ''),
                 'notes': 'Air + Ground pair'
             })
@@ -167,13 +184,14 @@ class DocumentationAgent:
         # PDB
         pdb = electronics.get('pdb', {})
         if pdb:
+            unit_price = get_price(pdb, 30)
             items.append({
                 'category': 'Electronics',
-                'item': f"{pdb.get('brand', '')} {pdb.get('model', 'PDB')}",
+                'item': get_item_name(pdb, 'PDB'),
                 'specification': f"{pdb.get('specs', {}).get('max_current_a', '')}A",
                 'quantity': 1,
-                'unit_price': pdb.get('price_usd', 30),
-                'total_price': pdb.get('price_usd', 30),
+                'unit_price': unit_price,
+                'total_price': unit_price,
                 'source': pdb.get('id', ''),
                 'notes': ''
             })
